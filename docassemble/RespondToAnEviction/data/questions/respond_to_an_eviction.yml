@@ -14,6 +14,7 @@ include:
 objects:
   - users: ALPeopleList.using(there_are_any=True)
   - users[i].lawyer: ALIndividual
+  - rental_property: ALAddress
   - other_parties: ALPeopleList.using(there_are_any=True)
   - other_parties[i].lawyer: ALIndividual
   - delivery_parties: ALPeopleList.using(there_are_any=True)
@@ -50,43 +51,51 @@ code: |
   sees_nav_bar
   how_to_use
   set_progress(5)
-  whats_next
+  eviction_options
+  eviction_forms
   accept_terms
-  lawsuit_information
   challenge_service
-  if eviction_case:
-    eviction_warning
-  elif small_claims_case:
-    small_claims_warning
+  if eviction_case == False:
+    not_eviction_kickout
   
   set_progress(15)
   nav.set_section('section_case_info')
+  appearance_info
   #user_ask_role
+  if rental_property.state != "IL":
+    not_illinois_property
   users.gather()
+  unknown_occupants
   set_progress(20)
   other_parties.gather()
   set_progress(30)
-  trial_court
+  trial_court_index
+  if trial_court_index == -1:
+    cclahd_info
   case_number
   if trial_with != "judge only":
     jury_demand_filing_info
     
   set_progress(30)
   nav.set_section('section_answer')
-  answer_intro
-  answer_responses.gather()
-  if answer_responses.number() == 46:
-    max_paragraphs
+  if optional_answer:
+    if general_denial == False:
+      answer_intro
+      answer_responses.gather()
+      if answer_responses.number() == 31:
+        max_paragraphs
 
 
   set_progress(40)
   nav.set_section('section_defenses')
   defenses_intro
+  defenses
 
 
   set_progress(60)
   nav.set_section('section_counterclaims')
   counterclaims_intro
+  optional_counterclaims
 
 
   set_progress(75)
@@ -143,7 +152,7 @@ subquestion: |
 
   You can find this information on the court papers you have about this case. 
 
-  Set aside 5 to 15 minutes to finish this program. You can log in and save your work to return to later. 
+  Set aside 10 to 20 minutes to finish this program. You can log in and save your work to return to later. 
  
   ${ collapse_template(help_example) }  
 
@@ -155,37 +164,36 @@ subject: |
 content: |  
   This is an example of help. Click again to hide.
 ---
-id: whats next
-continue button field: whats_next
+id: eviction options
+continue button field: eviction_options
 question: |
-  After you finish this program
+  Ways to respond to an eviction case
 subquestion: |
-  After you download your **Appearance** and **Answer** forms, you must file them with the court. This program does not file your forms for you.
+  If you are being sued in an eviction case, you have options:
   
-  Read the "How to Prepare and Send an Answer/Response to Complaint/Petition" instructions you can download at the end of this program. 
+  * You can **hire a lawyer** to help you. If you do not have money to hire one, you may be able to find a legal aid lawyer who will help you for free.
+  * You can **look for local services** such as legal representation, mediation, rental assistance programs, or other resources to help you resolve the case. You can look for help at [**Eviction Help Illinois**](https://www.illinoislegalaid.org/evictionhelpillinois) or apply for help by texting "Eviction" to 85622.
+  * If you live in Cook County, Cook County Legal Aid for Housing and Debt (CCLAHD) can help resolve housing problems. Visit the [**CCLAHD website**](https://www.cookcountylegalaid.org/) or call 855-956-5763.
+  * You can **represent yourself**. If you don’t hire a lawyer, there is paperwork you can file to get into the case and defend yourself. This is called appearing “pro se.”
+  * You can **do nothing**. If you ignore the lawsuit, you will probably be evicted and a judgment for money may be entered against you.
+  
+  If you would like help finding free or low-cost legal services in your area, use [**Get Legal Help**](https://www.illinoislegalaid.org/get-legal-help).
 ---
-# switched to version of question in ILAO framework
-#id: accept terms
-#question: |
-#  Terms of use
-#subquestion: |
-#  This program does not provide legal advice. It does not take the place of advice from a lawyer.
-#
-#  Using this program does not create an attorney-client relationship between you and Illinois Legal Aid Online or its employees.
-#
-#  ${ collapse_template(get_legal_help) }  
-#
-#fields:
-#  - To continue, you must accept the [**terms of use**](https://www.illinoislegalaid.org/about/terms-of-use).: accept
-#    datatype: checkboxes
-#    none of the above: False
-#    minlength: 1
-#    choices:
-#      - I accept the terms of use.
-#    validation messages:
-#      minlength: |
-#        You cannot continue unless you agree to the terms of use. 
-#continue button field: accept_terms
+id: eviction forms
+continue button field: eviction_forms
+question: |
+  Forms used when responding to an eviction case
+subquestion: |
+  This program can help you make several forms that may be useful in your eviction case. Here are some definitions.
+
+  * **Appearance**: Tells the judge and the Plaintiff (for example, the landlord or owner) that you are participating in the case. It also says whether you want a trial by judge only or by judge and jury.
+  * **Answer**: Your response to each paragraph in the Eviction Complaint.
+  * **Affirmative Defenses**: Your reasons why the Plaintiff should not win the case even if everything in the complaint is true.
+  * **Counterclaims**: Your separate legal claim(s) against the Plaintiff, specifically stating what relief you want from the court. Counterclaims must be directly related to the eviction, or the judge may dismiss them.
+
+  After you download your forms, you must file them with the court. This program **does not** file your forms for you.
+  
+  To learn more, read the "How to Respond to an Eviction Complaint" instructions you can download at the end of this program. 
 ---
 template: get_legal_help
 subject: |
@@ -195,94 +203,103 @@ content: |
   
   Use [**Get Legal Help**](https://www.illinoislegalaid.org/get-legal-help) to find free or low-cost legal services in your area.
 ---
-id: lawsuit information
-continue button field: lawsuit_information
-question: |
-  Lawsuit information
-subquestion: |
-  If you received a Complaint or Petition and a Summons, you have been sued. You need to tell the court you want to participate in your case. You tell the court you are participating in the case by filing an **{Appearance}**. In some cases, you need to file an **{Answer}** to respond to the Complaint or Petition.
-
-  The Summons you received will tell you the deadline for filing your Appearance and Answer. If you do not respond by the deadline, you can be found in default, and the court can rule against you.
-  
-  To learn more, read ILAO's article about [**responding to a lawsuit**](https://www.illinoislegalaid.org/node/32236).
-  
-  ${ collapse_template(response_required_help) }  
-  
-  If you would like help finding free or low-cost legal services in your area, use [**Get Legal Help**](https://www.illinoislegalaid.org/get-legal-help).
----
-template: response_required_help
-subject: |
-  **Do I need to file a written Answer?**
-content: |  
-  There are two kinds of cases where you must appear in person but are not required to file a written Answer:
-
-  * The lawsuit is for money and involves $10,000 or less. This is called a Small Claims case.
-  * An eviction lawsuit (formerly called Forcible Entry and Detainer).
-  
-  Although you are not required to file an Answer before you go to court for these types of cases, the judge might order you to file an Answer after you go to court.
----
 id: challenge service
 continue button field: challenge_service
 question: |
   Think about defenses
 subquestion: |
-  There can be many defenses to a lawsuit. However, a few special defenses must be brought up **before** you file your Answer. If you want to:
+  There can be many defenses to an eviction lawsuit. However, a few special defenses must be brought up **before** you file your Answer. If you want to:
   
-  * Challenge the way the Summons and Complaint or Petition were received by you, also called service of process, or
-  * Dismiss the Complaint or Petition because the lawsuit does not have a legal basis,
+  * Challenge the way the Summons and Complaint were received by you, also called service of process, or
+  * Dismiss the Complaint because the lawsuit does not have a legal basis,
   
   Then you need to file a Motion **before** you file your Answer.
 
-  You should talk with a lawyer about whether you have a legal reason to challenge how the Complaint or Petition was received or whether you have a legal reason to have it dismissed.
+  You should talk with a lawyer about whether you have a legal reason to challenge how the Eviction Complaint was received or whether you have a legal reason to have it dismissed.
   
   If you would like help finding free or low-cost legal services in your area, use [**Get Legal Help**](https://www.illinoislegalaid.org/get-legal-help).
 ---
 id: ask if eviction case
 question: |
-  Are you responding to an eviction lawsuit?
+  Are you responding to a residential eviction lawsuit?
+subquestion: |
+  A residential eviction is a case where a landlord is suing to evict tenants.
+
+  ${ collapse_template(other_evictions_help) }
+
 fields:
   - no label: eviction_case
     datatype: yesnoradio
 ---
-id: eviction warning
-continue button field: eviction_warning
+id: not eviction kickout
+event: not_eviction_kickout
 question: |
-  Written response optional in eviction
+  Sorry
 subquestion: |
-  In an eviction, you must go to court but you are usually not required to file a written response.
+  The forms made by this program are only for residential evictions. They cannot be used in other kinds of lawsuits or in these types of evictions:
   
-  The judge might order you to file an Answer after you go to court.
+  * Commercial,
+  * Mobile homes,
+  * Condominium owners being sued by the association, or
+  * Contracts for deed (also called rent to own agreements or installment sales agreements).
   
-  To learn more, read ILAO's article about [**understanding eviction as a tenant**](https://www.illinoislegalaid.org/legal-information/understanding-eviction-tenant).
----
-id: ask if small claims case
-question: |
-  Are you being sued for $10,000 or less?
-subquestion: |
-  This lawsuit for money is called a small claims case.
-fields:
-  - no label: small_claims_case
-    datatype: yesnoradio
----
-id: small claims warning
-continue button field: small_claims_warning
-question: |
-  Written response optional in small claims
-subquestion: |
-  In a small claims case, you must go to court but you are usually not required to file a written response.
-  
-  The judge might order you to file an Answer after you go to court.
+  To respond to a different kind of lawsuit, use ILAO's [**Respond to a lawsuit Easy Form**](https://www.illinoislegalaid.org/legal-information/respond-to-a-lawsuit).
 
-  To learn more, read ILAO's article about [**being sued for $10,000 or less**](https://www.illinoislegalaid.org/legal-information/being-sued-10000-or-less).
+  Click **Back** if you made a mistake. Or you can talk with a lawyer to discuss your options. Use **[Get Legal Help](https://www.illinoislegalaid.org/get-legal-help)** to find free or low-cost legal services in your area.
+buttons:
+  - Exit: exit
+  - Restart: restart
+---
+template: other_evictions_help
+subject: |
+  **What evictions are not residential evictions?**
+content: |  
+  Evictions that **are not** residential evictions include:
+  
+  * Commercial,
+  * Mobile homes,
+  * Condominium owners being sued by the association, or
+  * Contracts for deed (also called rent to own agreements or installment sales agreements).
+---
+id: rental property address
+question: |
+  What is the address of the rental property?
+fields:
+  - Street address: rental_property.address
+    address autocomplete: True
+  - Address line 2: rental_property.unit
+    required: False
+  - City: rental_property.city
+  - State: rental_property.state
+    code: |
+      states_list()
+  - ZIP code: rental_property.zip
+  - County: rental_property.county
+---
+id: not illinois property
+event: not_illinois_property
+question: |
+  Sorry
+subquestion: |
+  The rental property must be in Illinois to use this program.
+  
+  Click **Back** if you made a mistake. Or you can talk with a lawyer to discuss your options. 
+
+  You can use the [**Legal Services Corporation website**](https://www.lsc.gov/about-lsc/what-legal-aid/get-legal-help) to find a legal aid organization in another state. Or you can use **[Get Legal Help](https://www.illinoislegalaid.org/get-legal-help)** to find free or low-cost legal services in your area.
+buttons:
+  - Exit: exit
+  - Restart: restart
 ---
 id: any other users
 question: |
-  % if al_form_type in ['starts_case','existing_case','appeal']:
   Is anyone else on your side of this case?
-  % else:
-  Is anyone else adding their name to this form with you?
-  % endif
 subquestion: |
+  These would be the other tenants listed on the eviction court papers.
+
+  ${ collapse_template(other_parties_help) }
+
+  **Note:** If "Unknown Occupants" are listed on the Eviction Complaint as defendants, you can add them to your forms on another screen.
+  
   % if len(users.elements) > 1:  
   So far you have told us about ${comma_and_list(users.complete_elements().full_names())}.
   % endif  
@@ -294,11 +311,7 @@ template: other_parties_help
 subject: |
   **How do I know if there are others?**
 content: |  
-    % if user_ask_role == 'plaintiff':
-    You said you are the **Plaintiff** or the **Petitioner.** The other people on your side of the case would be co-plaintiffs or co-petitioners.
-    % else:
-    You said you are the **Defendant** or the **Respondent.** The other people on your side of the case would be co-defendants or co-respondents.
-    % endif
+    You said you are being sued in an eviction, so you are the **Defendant.** The other people on your side of the case would be co-defendants.
 ---
 depends on:
   - user_started_case
@@ -306,13 +319,10 @@ sets:
   - users[i].name.first
 id: other users names
 question: |
-  % if al_form_type in ['starts_case','existing_case','appeal']:
   What is the name of the ${ ordinal(i) } person who is part of the case with you?
-  % else:
-  What is the name of the ${ ordinal(i) } person who is adding their name to
-  this form with you?
-  % endif
 subquestion: |
+  List the plaintiff names as they are listed on the Eviction Complaint.
+
   ${ collapse_template(long_name_help) }
 fields:
   - code: |
@@ -324,15 +334,20 @@ subject: |
 content: |
   If the party has a long name like "Jane Smith, Director of Housing," select **Business or organization**. You can then enter the full name and title.
 ---
+id: unknown occupants
+question: |
+  Are "Unknown Occupants" listed as defendants on your Eviction Complaint?
+subquestion: |
+  Answer **Yes** if they were listed on the Eviction Complaint. They could be listed as defendants or there might be a checkbox.
+fields:
+  - "Are Unknown Occupants listed on the Eviction Complaint?": unknown_occupants
+    datatype: yesnoradio
+---
 # modified other opposing parties question
 # add to basic questions
 id: any other opposing parties
 question: |
-  % if users==plaintiffs:
-  Is there another **defendant** or **respondent** in this case?
-  % else:
-  Is there another **plaintiff** or **petitioner** in this case?
-  % endif
+  Is there another plaintiff in this case?
 subquestion: |
   % if len(other_parties.elements) >= 1:  
   So far you have told us about ${comma_and_list(other_parties.complete_elements().full_names())}.
@@ -347,13 +362,11 @@ sets:
   - other_parties[i].name.first
 id: names of opposing parties
 question: |
-  % if users==plaintiffs:
-  Name of ${ ordinal(i) } **defendant** or **respondent** in this case
-  % else:
-  Name of ${ ordinal(i) } **plaintiff** or **petitioner** in this case
-  % endif
+  Name of ${ ordinal(i) } plaintiff in this case
 subquestion: |
-  The **plaintiff** or **petitioner** is the person who is suing you. They started the case.
+  The **plaintiff** is the person or company who is suing you. In an eviction case, this is usually the landlord or a property management company.
+  
+  List the plaintiff names as they are listed on the Eviction Complaint.
 
   ${ collapse_template(long_name_help) }
 fields:
@@ -390,6 +403,27 @@ code: |
   else:
     trial_court = court_list.as_court('trial_court', trial_court_index)
 ---
+id: cclahd info
+continue button field: cclahd_info
+question: |
+  Eviction help in Cook County
+subquestion: |
+  If you are being evicted in Cook County, Cook County Legal Aid for Housing and Debt (CCLAHD) can help resolve housing problems.
+  
+  Visit the [**CCLAHD website**](https://www.cookcountylegalaid.org/) or call 855-956-5763.
+
+---
+id: appearance and jury demand info
+continue button field: appearance_info
+question: |
+  Appearance and jury trial information
+subquestion: |
+  Whether or not you have filed a written appearance before your court date, you still must go to court to tell the judge that you want to be a part of the case.
+
+  You have the right to a jury trial. If you want a jury trial, make sure you check the appropriate box on the Appearance form. If you don’t check that box, or if you don’t file your Appearance before the court date and time on your Eviction Summons, you may lose the right to a jury trial.
+
+  If you haven’t requested a jury by the first court date, the judge may give you additional time to do so if you ask, but there is no guarantee you will get extra time.
+---
 id: case number
 question: |
   What is the case number?
@@ -402,9 +436,7 @@ template: case_number_help
 subject: |
   **Where can I find this?**
 content: |  
-  The case number should be on your court papers. Look at the Complaint or Petition, or the Summons if you received one. It is usually in the top-right part of the first page.
-  
-  If you started the case, the court clerk should have given you the case number.
+  The case number should be on your court papers. Look at the Complaint or Summons. It is usually in the top-right part of the first page.
   
   In this example, the case number is **2022 EXAMPLE 123**.
   
@@ -414,7 +446,7 @@ id: trial by jury
 question: |
   Who do you want to decide your case?
 subquestion: |
-  Note: You do not have a right to a jury trial in every case. There can be an additional fee for a jury trial.
+  Note: There can be an additional fee for a jury trial.
   
   To learn more, read ILAO's article about [**jury trials and judge trials**](https://www.illinoislegalaid.org/node/178441).
 field: trial_with
@@ -489,12 +521,39 @@ content: |
 
   See the [**Code of Civil Procedure, 735 ILCS 5/1-109**](https://www.ilga.gov/legislation/ilcs/documents/073500050k1-109.htm), for more information.
 ---
+id: optional answer
+question: |
+  Do you want to file a written Answer?
+subquestion: |
+  In an Eviction Answer, you can explain whether you admit or deny what the plaintiffs said in the Eviction Complaint.
+  
+  You can respond to each claim one-by-one, or you can deny them all. Denying them all is called a general denial.
+
+  You are not required to file an Eviction Answer unless a judge orders you to. If you are filing any counterclaims, you must file a written Eviction Answer.
+fields:
+  - File a written Answer?: optional_answer
+    datatype: yesnoradio
+---
+id: general denial
+question: |
+  Do you want to deny all claims in the Eviction Complaint?
+subquestion: |
+  This is called a general denial.
+
+  If you select **No**, you can respond to each one on the next screens.
+fields:
+  - no label: general_denial
+    datatype: radio
+    choices:
+      - Yes, I want to deny all the claims in the Eviction Complaint.: True
+      - No, I want to respond to each claim one-by-one.: False
+---
 id: answer intro
 continue button field: answer_intro
 question: |
-  Respond to statements in the Complaint
+  Respond to statements in the Eviction Complaint
 subquestion: |
-  You should respond to every paragraph and subparagraph in the order they appear in the Complaint or Petition you received.
+  You should respond to every paragraph and subparagraph in the order they appear in the Eviction Complaint.
 
   Your options are:
   
@@ -502,7 +561,7 @@ subquestion: |
   * **{Deny}**, or
   * **{Do not know}**.
   
-  The forms made by this program allow you to respond to up to 46 total paragraphs and subparagraphs. If you need to respond to more, download a blank [**Additional Paragraphs for Answer/Response**](https://www.illinoiscourts.gov/documents-and-forms/approved-forms/circuit-forms/answer-response). 
+  The forms made by this program allow you to respond to up to 31 total paragraphs and subparagraphs. If you need to respond to more, download a blank [**Additional Paragraphs for Answer/Response**](https://www.illinoiscourts.gov/documents-and-forms/approved-forms/circuit-forms/answer-response). 
 terms:
   Admit: |
     You agree that **all** of the statements in the paragraph are true.
@@ -518,6 +577,10 @@ sets:
   - answer_responses[i].response
 question: |
   What is your response to the ${ ordinal(i) } paragraph?
+subquestion: |
+  In the Eviction Complaint, each paragraph should be numbered (1, 2, 3). There might be subparagraphs like 2a, 2b, and 2c.
+  
+  Be sure to respond to each one.
 fields:
   - Paragraph number: answer_responses[i].para
     maxlength: 10
@@ -581,9 +644,30 @@ subquestion: |
 id: affirmative defenses intro
 continue button field: defenses_intro
 question: |
-  Affirmative defenses intro placeholder
+  Affirmative defenses
 subquestion: |
-  ADD TEXT
+  Affirmative defenses are reasons why the Plaintiff should not win the case even if everything in the Eviction Complaint was true.
+  
+  An affirmative defense is not that same as saying "I did nothing wrong." Instead, it is saying: "even if you think the landlord is right, I should win because I have this defense."
+  
+  This program will explain the most common affirmative defenses. To learn more, read ILAO's article about [**common eviction defenses**](https://www.illinoislegalaid.org/node/31006).
+---
+id: optional affirmative defenses
+question: |
+  What are your Affirmative Defenses?
+subquestion: |
+  You can add details on the next screens.
+fields:
+  - I have these defenses:: defenses
+    datatype: checkboxes
+    choices:
+      - I received none or an improper written notice of eviction.: notice
+      - I fixed the lease violation to stop the eviction.: cure
+      - Bad property conditions made the rental unit worth less than the rent I owe.: conditions
+      - The landlord is retaliating against me for something I did.: retaliation
+      - After the landlord started to evict me for violating the lease, they signed a new lease or accepted my rent payment.: waiver
+      - I tried to pay my rent, but the landlord refuse to accept it.: refusal
+      - I have other affirmative defenses not listed here.: other
 ---
 id: counterclaims intro
 continue button field: counterclaims_intro
@@ -591,6 +675,13 @@ question: |
   Counterclaims intro placeholder
 subquestion: |
   ADD TEXT
+---
+id: optional counterclaims
+continue button field: optional_counterclaims
+question: |
+  Do you want to file any Counterclaimss?
+subquestion: |
+  Not required by law. Only have to if you want to. 
 ---
 reconsider: True
 code: |
