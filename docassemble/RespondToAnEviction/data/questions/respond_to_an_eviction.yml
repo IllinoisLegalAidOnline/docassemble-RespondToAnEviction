@@ -16,6 +16,7 @@ objects:
   - users[i].lawyer: ALIndividual
   - rental_property: ALAddress
   - other_parties: ALPeopleList.using(there_are_any=True)
+  - conditions: DAList.using(object_type=Thing, complete_attribute='complete', there_are_any=True)
   - other_parties[i].lawyer: ALIndividual
   - delivery_parties: ALPeopleList.using(there_are_any=True)
   - delivery_parties[i].lawyer: ALIndividual
@@ -90,6 +91,15 @@ code: |
   nav.set_section('section_defenses')
   defenses_intro
   defenses
+  if defenses['notice'] == True:
+    notice_defense
+  if defenses['cure'] == True:
+    cure_defense
+  if defenses['conditions'] == True:
+    conditions_intro
+    conditions.gather()
+  if defenses['retaliation'] == True:
+    retaliation_intro
 
 
   set_progress(60)
@@ -661,13 +671,128 @@ fields:
   - I have these defenses:: defenses
     datatype: checkboxes
     choices:
-      - I received none or an improper written notice of eviction.: notice
+      - I received no written notice of eviction or an improper written notice of eviction.: notice
       - I fixed the lease violation to stop the eviction.: cure
       - Bad property conditions made the rental unit worth less than the rent I owe.: conditions
       - The landlord is retaliating against me for something I did.: retaliation
       - After the landlord started to evict me for violating the lease, they signed a new lease or accepted my rent payment.: waiver
       - I tried to pay my rent, but the landlord refuse to accept it.: refusal
       - I have other affirmative defenses not listed here.: other
+---
+id: notice defense
+question: |
+  What was wrong with the Notice you received?
+subquestion: |
+  Check all that apply.
+
+  If none of these are right, you can click **Back** and change your answer.
+fields:
+  - Notice problems: notice_defense
+    datatype: checkboxes
+    minlength: 1
+    none of the above: False
+    choices:
+      - __No Notice__ - The landlord says that I did not pay my rent or that I otherwise violated my lease, but I did not get a written notice from the landlord.: no_notice
+      - __Improper service of Notice__ - The landlord did not give me notice in a lawful way.: improper_service
+      - __Improper Notice__ - The notice did not say the correct number of days or the landlord did not wait the correct number of days before filing the Eviction Complaint.: improper_notice
+      - __Inadequate Notice__ - The notice is missing required information like the amount of rent owed or how I violated the lease.: inadequate_notice 
+    validation messages:
+      minlength: |
+        Please select at least one or click < Back if none apply.
+---
+id: cure defense
+question: |
+  Lease violation fixed
+subquestion: |
+  This affirmative defense is available if:
+  
+  * You had a right to fix (cure) the violation, and
+  * You did so within the required time period.
+
+  **Note:** If you live in Chicago or Cook County, most tenants have a one-time right to stop an eviction for unpaid rent. This is called "pay and stay." You can cure by paying back rent and court costs before a judge signs an Eviction Order. If your building has six units or fewer, this only applies if your landlord does not live in the building.
+fields:
+  - Additional details about how you fixed the lease violation:: cure_defense
+    input type: area
+    rows: 3
+    maxlength: 200
+---
+id: conditions intro
+continue button field: conditions_intro
+question: |
+  Bad property conditions
+subquestion: |
+  REPHRASE THIS: Plaintiff (landlord) is trying to evict me for not paying rent. But the landlord’s failure to make necessary repairs reduced the value of the property by an amount that is more than the rent I owe. In the alternative, any reduction in the value of the property should decrease the rent I owe.
+---
+id: conditions details
+question: |
+  Bad property conditions details
+subquestion: |
+  Add details about your property conditions.
+fields:
+  - Serious problems that the landlord knew about: conditions[i].name.text
+    input type: area
+    rows: 3
+    maxlength: 100
+  - Date when problem started: conditions[i].date_started
+    datatype: date
+    max: ${ today().format("yyyy-MM-dd") }
+  - Date when fixed (if any): conditions[i].date_fixed
+    datatype: date
+    max: ${ today().format("yyyy-MM-dd") }
+    required: False
+validation code: |
+  if conditions[i].date_fixed != "":
+    if conditions[i].date_fixed < conditions[i].date_started:
+      validation_error("Date problem fixed must be on or after date problem started. Please adjust your answers.", field="conditions[i].date_fixed")
+---
+id: any other conditions
+question: |
+  Are there other bad conditions?
+subquestion: |
+  
+  You can enter up to 16 problems. So far you have told us about:
+  
+  % for condition in conditions:
+   * ${condition.name.text}
+  % endfor
+fields:
+  - "Add other problems?": conditions.there_is_another
+    datatype: yesnoradio
+---
+code: |
+  conditions[i].name.text
+  conditions[i].complete = True
+---
+code: |
+  if conditions.number_gathered() >= 16:
+    conditions.there_is_another = False
+---
+id: retaliation intro
+continue button field: retaliation_intro
+question: |
+  Retaliation
+subquestion: |
+  REPHRASE THIS: You may have a defense of retaliation if you believe the landlord filed the eviction in retaliation for something you did.
+
+  This means you complained about a:
+
+  * housing condition,
+  * health violation, or
+  * other violation
+
+  about the property to an appropriate organization, and the landlord is evicting you for complaining.
+
+  State law only protects you from being evicted if you complain to someone in government about your landlord or unit.
+
+  Chicago, Cook County, and other local jurisdictions may have extra protections for some renters.
+
+---
+
+
+
+
+
+
 ---
 id: counterclaims intro
 continue button field: counterclaims_intro
