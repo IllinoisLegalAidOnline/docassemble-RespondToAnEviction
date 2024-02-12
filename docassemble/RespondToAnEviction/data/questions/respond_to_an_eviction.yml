@@ -90,16 +90,13 @@ code: |
   set_progress(40)
   nav.set_section('section_defenses')
   defenses_intro
-  defenses
-  if defenses['notice'] == True:
-    notice_defense
-  if defenses['cure'] == True:
-    cure_defense
-  if defenses['conditions'] == True:
-    conditions_intro
+  #defenses
+  notice_defense
+  cure_defense
+  if conditions_defense:
     conditions.gather()
-  if defenses['retaliation'] == True:
-    retaliation_intro
+  if retaliation_state or retaliation_local:
+    retaliation_details
 
 
   set_progress(60)
@@ -236,6 +233,8 @@ subquestion: |
   A residential eviction is a case where a landlord is suing to evict tenants.
 
   ${ collapse_template(other_evictions_help) }
+  
+  **Note:** A Notice of Termination from your landlord is not the same as being evicted in a lawsuit. If you received an Eviction Complaint and a Summons from the sheriff, you were likely sued.  
 
 fields:
   - no label: eviction_case
@@ -656,9 +655,11 @@ continue button field: defenses_intro
 question: |
   Affirmative defenses
 subquestion: |
-  Affirmative defenses are reasons why the Plaintiff should not win the case even if everything in the Eviction Complaint was true.
+  Affirmative defenses are reasons why the Plaintiff should not win the case even if everything in the Eviction Complaint is true.
   
-  An affirmative defense is not that same as saying "I did nothing wrong." Instead, it is saying: "even if you think the landlord is right, I should win because I have this defense."
+  An affirmative defense is not that same as saying "I did nothing wrong." Instead, it is telling the court: "even if you think the landlord is right, I should win because I have this defense."
+  
+  **Note:** You will have to prove your affirmative defenses in court.
   
   This program will explain the most common affirmative defenses. To learn more, read ILAO's article about [**common eviction defenses**](https://www.illinoislegalaid.org/node/31006).
 ---
@@ -681,33 +682,31 @@ fields:
 ---
 id: notice defense
 question: |
-  What was wrong with the Notice you received?
+  What, if anything, was wrong with the Notice you received?
 subquestion: |
   Check all that apply.
 
-  If none of these are right, you can click **Back** and change your answer.
+  If none of these apply, you can click **Next**.
 fields:
   - Notice problems: notice_defense
     datatype: checkboxes
-    minlength: 1
     none of the above: False
     choices:
       - __No Notice__ - The landlord says that I did not pay my rent or that I otherwise violated my lease, but I did not get a written notice from the landlord.: no_notice
       - __Improper service of Notice__ - The landlord did not give me notice in a lawful way.: improper_service
       - __Improper Notice__ - The notice did not say the correct number of days or the landlord did not wait the correct number of days before filing the Eviction Complaint.: improper_notice
-      - __Inadequate Notice__ - The notice is missing required information like the amount of rent owed or how I violated the lease.: inadequate_notice 
-    validation messages:
-      minlength: |
-        Please select at least one or click < Back if none apply.
+      - __Inadequate Notice__ - The notice is missing required information like the amount of rent owed or how I violated the lease.: inadequate_notice
 ---
 id: cure defense
 question: |
-  Lease violation fixed
+  Did you fix the lease violation that was the reason for the eviction?
 subquestion: |
-  This affirmative defense is available if:
+  This affirmative defense is available only if:
   
   * You had a right to fix (cure) the violation, and
   * You did so within the required time period.
+
+  If this does not apply, you can leave this blank.
 
   **Note:** If you live in Chicago or Cook County, most tenants have a one-time right to stop an eviction for unpaid rent. This is called "pay and stay." You can cure by paying back rent and court costs before a judge signs an Eviction Order. If your building has six units or fewer, this only applies if your landlord does not live in the building.
 fields:
@@ -715,19 +714,23 @@ fields:
     input type: area
     rows: 3
     maxlength: 200
+    required: False
+
 ---
 id: conditions intro
-continue button field: conditions_intro
 question: |
-  Bad property conditions
+  Did bad property conditions reduce the value of your rental unit?
 subquestion: |
   REPHRASE THIS: Plaintiff (landlord) is trying to evict me for not paying rent. But the landlord’s failure to make necessary repairs reduced the value of the property by an amount that is more than the rent I owe. In the alternative, any reduction in the value of the property should decrease the rent I owe.
+fields:
+  Were there bad property conditions?: conditions_defense
+  datatype: yesnoradio
 ---
-id: conditions details
+id: conditions defense
 question: |
   Bad property conditions details
 subquestion: |
-  Add details about your property conditions.
+  Enter details about your property conditions.
 fields:
   - Serious problems that the landlord knew about: conditions[i].name.text
     input type: area
@@ -747,7 +750,7 @@ validation code: |
 ---
 id: any other conditions
 question: |
-  Are there other bad conditions?
+  Are there other bad property conditions?
 subquestion: |
   
   You can enter up to 16 problems. So far you have told us about:
@@ -767,17 +770,14 @@ code: |
   if conditions.number_gathered() >= 16:
     conditions.there_is_another = False
 ---
-id: retaliation intro
-continue button field: retaliation_intro
+id: retaliation
 question: |
-  Retaliation
+  Retaliation defense
 subquestion: |
-  REPHRASE THIS: You may have a defense of retaliation if you believe the landlord filed the eviction in retaliation for something you did.
+  You may have a defense of retaliation if you believe the landlord filed the eviction in retaliation for something you did. This means you complained about:
 
-  This means you complained about a:
-
-  * housing condition,
-  * health violation, or
+  * a housing condition,
+  * a health violation, or
   * other violation
 
   about the property to an appropriate organization, and the landlord is evicting you for complaining.
@@ -786,8 +786,65 @@ subquestion: |
 
   Chicago, Cook County, and other local jurisdictions may have extra protections for some renters.
 
+  Check all that apply. If none of these apply, you can click **Next**.
+fields:
+  - label: |
+      I am protected from retaliation by **State law**. My landlord retaliated against me because I complained to someone in government about a building code or violation within my unit.
+    field: retaliation_state
+    datatype: yesnowide  
+  - label: |
+      I am protected from retaliation by a **local ordinance**. My landlord retaliated against me because I complained to someone in government about a building code or violation within my unit.
+    field: retaliation_local
+    datatype: yesnowide  
+  - Municipality or county where the property is located: retaliation_ordinance
+    maxlength: 25
+    show if:
+      variable: retaliation_local
+      is: True
+  - Who did you you complain to? (Check all that apply.): retaliation_complain_to
+    datatype: checkboxes
+    none of the above: False
+    choices:
+      - My landlord: landlord
+      - A legal organization: legal_org
+      - A community group: community_group
+      - Someone in government: government
+      - The media: media
+      - A tenants organization: tenants_org
+      - Another person or entity: other
+    show if:
+      variable: retaliation_local
+      is: True
+  - Other person or entity you complained to: retaliation_complain_to_other
+    maxlength: 40
+    js show if: 
+      val("retaliation_local") == true && val("retaliation_complain_to") == "other"
+  - Is your landlord retaliating against you because you did something else?: retaliation_activity
+    datatype: yesnoradio
+    show if:
+      variable: retaliation_local
+      is: True
+  - Name the activity (you can give details on the next screen):: retaliation_activity_name
+    maxlength: 30
+    js show if: 
+      val("retaliation_local") == true && val("retaliation_activity") == true
 ---
-
+id: retaliation defense details
+question: |
+  Retaliation defense details
+subquestion: |
+  For your retaliation defense, explain:
+  
+  * Who you complained about the landlord to,
+  * When you told them, and
+  * What you said to them.
+  
+  If your landlord retaliated against you for other activity you did, explain what you did and when.
+fields:
+  - no label: retaliation_details
+    datatype: area
+    rows: 3
+    maxlength: 300
 
 
 
