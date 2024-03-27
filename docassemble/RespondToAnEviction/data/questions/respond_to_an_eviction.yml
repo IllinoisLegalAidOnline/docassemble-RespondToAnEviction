@@ -97,7 +97,8 @@ code: |
     conditions.gather()
   if retaliation_state or retaliation_local:
     retaliation_details
-
+  waiver_defense
+  rent_refusal_defense
 
   set_progress(60)
   nav.set_section('section_counterclaims')
@@ -140,7 +141,7 @@ question: |
 subquestion: |
   Welcome to Illinois Legal Aid Online's **Respond to an eviction** Easy Form.
 
-  This program helps you respond to an eviction by telling the court and the other parties that you are participating in a court case. It also helps you make an *Eviction Answer, Affirmative Defenses, and Counterclaims* form that tells how you respond to what is written in the complaint.
+  This program helps you respond to an eviction by telling the court and the other parties that you are participating in the court case. It also helps you make an *Eviction Answer, Affirmative Defenses, and Counterclaims* form that tells how you respond to what is written in the complaint.
   
   To learn more, read ILAO's article about [**understanding an eviction**](https://www.illinoislegalaid.org/node/31071).
 field: sees_nav_bar
@@ -155,7 +156,7 @@ subquestion: |
   * The Eviction Complaint that you received,
   * ADD OTHER INFO, 
   * Names and addresses of the other parties, and
-  * Names and addresses of the other parties’ lawyers. 
+  * Names and addresses of the other parties' lawyers. 
 
   You can find this information on the court papers you have about this case. 
 
@@ -181,7 +182,7 @@ subquestion: |
   * You can **hire a lawyer** to help you. If you do not have money to hire one, you may be able to find a legal aid lawyer who will help you for free.
   * You can **look for local services** such as legal representation, mediation, rental assistance programs, or other resources to help you resolve the case. You can look for help at [**Eviction Help Illinois**](https://www.illinoislegalaid.org/evictionhelpillinois) or apply for help by texting "Eviction" to 85622.
   * If you live in Cook County, Cook County Legal Aid for Housing and Debt (CCLAHD) can help resolve housing problems. Visit the [**CCLAHD website**](https://www.cookcountylegalaid.org/) or call 855-956-5763.
-  * You can **represent yourself**. If you don’t hire a lawyer, there is paperwork you can file to get into the case and defend yourself. This is called appearing “pro se.”
+  * You can **represent yourself**. If you don't hire a lawyer, there is paperwork you can file to get into the case and defend yourself. This is called appearing “pro se.”
   * You can **do nothing**. If you ignore the lawsuit, you will probably be evicted and a judgment for money may be entered against you.
   
   If you would like help finding free or low-cost legal services in your area, use [**Get Legal Help**](https://www.illinoislegalaid.org/get-legal-help).
@@ -330,7 +331,7 @@ id: other users names
 question: |
   What is the name of the ${ ordinal(i) } person who is part of the case with you?
 subquestion: |
-  List the plaintiff names as they are listed on the Eviction Complaint.
+  Enter the defendants' names as they are listed on the Eviction Complaint.
 
   ${ collapse_template(long_name_help) }
 fields:
@@ -373,7 +374,7 @@ id: names of opposing parties
 question: |
   Name of ${ ordinal(i) } plaintiff in this case
 subquestion: |
-  The **plaintiff** is the person or company who is suing you. In an eviction case, this is usually the landlord or a property management company.
+  The **plaintiff** is the person or company who is suing you. In an eviction case, this is usually the landlord, owner, or a property management company.
   
   List the plaintiff names as they are listed on the Eviction Complaint.
 
@@ -427,11 +428,11 @@ continue button field: appearance_info
 question: |
   Appearance and jury trial information
 subquestion: |
-  Whether or not you have filed a written appearance before your court date, you still must go to court to tell the judge that you want to be a part of the case.
+  Whether or not you have filed a written Appearance before your court date, you still must go to court to tell the judge that you want to be a part of the case.
 
-  You have the right to a jury trial. If you want a jury trial, make sure you check the appropriate box on the Appearance form. If you don’t check that box, or if you don’t file your Appearance before the court date and time on your Eviction Summons, you may lose the right to a jury trial.
+  You have the right to a jury trial. If you want a jury trial, make sure you select that option in this program. This will check the appropriate box on the Appearance form. If you don't check that box, or if you don't file your Appearance before the court date and time on your Eviction Summons, you may lose the right to a jury trial.
 
-  If you haven’t requested a jury by the first court date, the judge may give you additional time to do so if you ask, but there is no guarantee you will get extra time.
+  If you haven't requested a jury by the first court date, the judge may give you additional time to do so if you ask, but there is no guarantee you will get extra time.
 ---
 id: case number
 question: |
@@ -613,8 +614,8 @@ id: any other paragraphs
 question: |
   Are there any other paragraphs to respond to?
 subquestion: |
-  % if answer_responses.number() >= 45:
-  **Reminder:** This program can respond to up to 46 paragraphs.
+  % if answer_responses.number() >= 30:
+  **Reminder:** This program can respond to up to 31 paragraphs.
 
   % endif
   So far you have responded to paragraphs and subparagraphs:
@@ -634,7 +635,7 @@ code: |
 depends on:
   - answer_responses
 code: |
-  if answer_responses.number() == 46:
+  if answer_responses.number() == 31:
     answer_responses.there_is_another = False
 ---
 id: maximum paragraphs entered
@@ -682,11 +683,13 @@ fields:
 ---
 id: notice defense
 question: |
-  What, if anything, was wrong with the Notice you received?
+  Notice defense
 subquestion: |
-  Check all that apply.
+  If a landlord wants to evict a tenant, they must follow the law in how they notify the tenant. If something was wrong with the Notice you received that told you about the eviction case, that may be a defense to this eviction case.
+  
+  Note: It does not mean that the landlord can't evict you. It only means that they may have to start over and notify you in the proper way.
 
-  If none of these apply, you can click **Next**.
+  Check all that apply. If none of these apply, you can click **Next**.
 fields:
   - Notice problems: notice_defense
     datatype: checkboxes
@@ -699,8 +702,10 @@ fields:
 ---
 id: cure defense
 question: |
-  Did you fix the lease violation that was the reason for the eviction?
+  Cure defense
 subquestion: |
+  If the landlord says you violated the lease, and your lease or a local law gives you time to "cure" or fix the problem, that may be a defense to the eviction.
+
   This affirmative defense is available only if:
   
   * You had a right to fix (cure) the violation, and
@@ -710,18 +715,25 @@ subquestion: |
 
   **Note:** If you live in Chicago or Cook County, most tenants have a one-time right to stop an eviction for unpaid rent. This is called "pay and stay." You can cure by paying back rent and court costs before a judge signs an Eviction Order. If your building has six units or fewer, this only applies if your landlord does not live in the building.
 fields:
-  - Additional details about how you fixed the lease violation:: cure_defense
+  - Did you fix the lease violation in time?: cure_defense
+    datatype: yesnoradio
+  - Additional details about how you fixed the lease violation:: cure_defense_details
     input type: area
     rows: 3
     maxlength: 200
     required: False
+    show if:
+      variable: cure_defense
+      is: True
 
 ---
 id: conditions intro
 question: |
-  Did bad property conditions reduce the value of your rental unit?
+  Bad property conditions defense
 subquestion: |
-  REPHRASE THIS: Plaintiff (landlord) is trying to evict me for not paying rent. But the landlord’s failure to make necessary repairs reduced the value of the property by an amount that is more than the rent I owe. In the alternative, any reduction in the value of the property should decrease the rent I owe.
+  If the landlord is trying to evict you for not paying rent and the rental property has bad conditions that decreased its value more than the rent you owe, then you may have a defense to the eviction.
+  
+  Even if the value of the property has been reduced a little by the bad property conditions, this could mean that you owe the landlord less money in unpaid rent. If you do not pay the landlord the full amount you owe, you may be evicted.
 fields:
   Were there bad property conditions?: conditions_defense
   datatype: yesnoradio
@@ -778,7 +790,7 @@ subquestion: |
 
   * a housing condition,
   * a health violation, or
-  * other violation
+  * another violation
 
   about the property to an appropriate organization, and the landlord is evicting you for complaining.
 
@@ -793,7 +805,7 @@ fields:
     field: retaliation_state
     datatype: yesnowide  
   - label: |
-      I am protected from retaliation by a **local ordinance**. My landlord retaliated against me because I complained to someone in government about a building code or violation within my unit.
+      I am protected from retaliation by a **local ordinance**. My landlord retaliated against me because I complained to someone about housing conditions or a violation within my unit.
     field: retaliation_local
     datatype: yesnowide  
   - Municipality or county where the property is located: retaliation_ordinance
@@ -845,9 +857,85 @@ fields:
     datatype: area
     rows: 3
     maxlength: 300
+---
+id: waiver defense
+question: |
+  Waiver defense
+subquestion: |
+  If the landlord says you violated the lease, but after they learned about the violation they acted like the lease continued, that may be a defense to the eviction.
 
+  After learning about the lease violation, if the landlord signed a new lease or accepted your rent payment, that would be acting like the lease continued.
 
+  This affirmative defense is known as Waiver because the landlord "waived" the right to evict you for that particular lease violation.
+fields:
+  - Did the landlord act like the lease continued after learning of a lease violation?: waiver_defense
+    datatype: yesnoradio
+  - note: Explain how the landlord acted like your lease continued.
+    show if:
+      variable: waiver_defense
+      is: True
+  - Date landlord signed a new lease with you:: new_lease_signed_date
+    datatype: date
+    required: False
+    show if:
+      variable: waiver_defense
+      is: True
+  - Date landlord accepted your rent:: rent_accepted_date
+    datatype: date
+    required: False
+    show if:
+      variable: waiver_defense
+      is: True
+  - Details:: waiver_defense_details
+    input type: area
+    rows: 3
+    maxlength: 200
+    required: False
+    show if:
+      variable: waiver_defense
+      is: True
+validation code: |
+  if rent_accepted_date == "" and new_lease_signed_date == "" and waiver_defense_details == "":
+    validation_error("You must explain how the lanlord waived the right to evict you. Please enter a date or give details.", field="waiver_defense_details")
+---
+id: refusal to accept rent defense
+question: |
+  Refusal to accept rent payment defense
+subquestion: |
+  If you tried to pay rent on time and the landlord refused to accept it, that may be a defense to the eviction.
 
+  FINISH updating fields
+
+fields:
+  - Did the landlord refuse your rent payment?: rent_refusal_defense
+    datatype: yesnoradio
+  - note: Explain how the landlord acted like your lease continued.
+    show if:
+      variable: waiver_defense
+      is: True
+  - Date landlord signed a new lease with you:: new_lease_signed_date
+    datatype: date
+    required: False
+    show if:
+      variable: waiver_defense
+      is: True
+  - Date landlord accepted your rent:: rent_accepted_date
+    datatype: date
+    required: False
+    show if:
+      variable: waiver_defense
+      is: True
+  - Details:: waiver_defense_details
+    input type: area
+    rows: 3
+    maxlength: 200
+    required: False
+    show if:
+      variable: waiver_defense
+      is: True
+validation code: |
+  if rent_accepted_date == "" and new_lease_signed_date == "" and waiver_defense_details == "":
+    validation_error("You must explain how the lanlord waived the right to evict you. Please enter a date or give details.", field="waiver_defense_details")
 
 
 ---
