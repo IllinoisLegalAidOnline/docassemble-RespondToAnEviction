@@ -17,6 +17,8 @@ objects:
   - rental_property: ALAddress
   - other_parties: ALPeopleList.using(there_are_any=True)
   - conditions: DAList.using(object_type=Thing, complete_attribute='complete', there_are_any=True)
+  - defenses: DAList.using(object_type=Thing, complete_attribute='complete', there_are_any=True)
+  - claims: DAList.using(object_type=Thing, complete_attribute='complete', there_are_any=True)
   - other_parties[i].lawyer: ALIndividual
   - delivery_parties: ALPeopleList.using(there_are_any=True)
   - delivery_parties[i].lawyer: ALIndividual
@@ -86,7 +88,6 @@ code: |
       if answer_responses.number() == 31:
         max_paragraphs
 
-
   set_progress(40)
   nav.set_section('section_defenses')
   defenses_intro
@@ -99,12 +100,15 @@ code: |
     retaliation_details
   waiver_defense
   rent_refusal_defense
+  if other_defense:
+    defenses.gather()
+  additional_defense_information
 
   set_progress(60)
   nav.set_section('section_counterclaims')
   counterclaims_intro
-  optional_counterclaims
-
+  if has_counterclaims:
+    claims.gather()
 
   set_progress(75)
   nav.set_section('section_delivery')
@@ -510,7 +514,7 @@ id: e-signature
 question: |
   Do you want to add your e-signature to your ${ form_name }?
 subquestion: |
-  If you do not add your **{e-signature}**, you must sign your paper form before you file and deliver it.
+  If you do not add your **{e-signature}**, you must sign your paper forms before you file and deliver them.
 
   ${ collapse_template(signature_help) }  
 fields:
@@ -664,22 +668,23 @@ subquestion: |
   
   This program will explain the most common affirmative defenses. To learn more, read ILAO's article about [**common eviction defenses**](https://www.illinoislegalaid.org/node/31006).
 ---
-id: optional affirmative defenses
-question: |
-  What are your Affirmative Defenses?
-subquestion: |
-  You can add details on the next screens.
-fields:
-  - I have these defenses:: defenses
-    datatype: checkboxes
-    choices:
-      - I received no written notice of eviction or an improper written notice of eviction.: notice
-      - I fixed the lease violation to stop the eviction.: cure
-      - Bad property conditions made the rental unit worth less than the rent I owe.: conditions
-      - The landlord is retaliating against me for something I did.: retaliation
-      - After the landlord started to evict me for violating the lease, they signed a new lease or accepted my rent payment.: waiver
-      - I tried to pay my rent, but the landlord refuse to accept it.: refusal
-      - I have other affirmative defenses not listed here.: other
+# will remove this question - note from 3/28/24
+#id: optional affirmative defenses
+#question: |
+#  What are your Affirmative Defenses?
+#subquestion: |
+#  You can add details on the next screens.
+#fields:
+#  - I have these defenses: defenses
+#    datatype: checkboxes
+#    choices:
+#      - I received no written notice of eviction or an improper written notice of eviction.: notice
+#      - I fixed the lease violation to stop the eviction.: cure
+#      - Bad property conditions made the rental unit worth less than the rent I owe.: conditions
+#      - The landlord is retaliating against me for something I did.: retaliation
+#      - After the landlord started to evict me for violating the lease, they signed a new lease or accepted my rent payment.: waiver
+#      - I tried to pay my rent, but the landlord refuse to accept it.: refusal
+#      - I have other affirmative defenses not listed here.: other
 ---
 id: notice defense
 question: |
@@ -717,7 +722,7 @@ subquestion: |
 fields:
   - Did you fix the lease violation in time?: cure_defense
     datatype: yesnoradio
-  - Additional details about how you fixed the lease violation:: cure_defense_details
+  - Additional details about how you fixed the lease violation: cure_defense_details
     input type: area
     rows: 3
     maxlength: 200
@@ -738,7 +743,7 @@ fields:
   Were there bad property conditions?: conditions_defense
   datatype: yesnoradio
 ---
-id: conditions defense
+id: conditions defense details
 question: |
   Bad property conditions details
 subquestion: |
@@ -836,7 +841,7 @@ fields:
     show if:
       variable: retaliation_local
       is: True
-  - Name the activity (you can give details on the next screen):: retaliation_activity_name
+  - Name the activity (you can give details on the next screen): retaliation_activity_name
     maxlength: 30
     js show if: 
       val("retaliation_local") == true && val("retaliation_activity") == true
@@ -874,19 +879,19 @@ fields:
     show if:
       variable: waiver_defense
       is: True
-  - Date landlord signed a new lease with you:: new_lease_signed_date
+  - Date landlord signed a new lease with you: new_lease_signed_date
     datatype: date
     required: False
     show if:
       variable: waiver_defense
       is: True
-  - Date landlord accepted your rent:: rent_accepted_date
+  - Date landlord accepted your rent: rent_accepted_date
     datatype: date
     required: False
     show if:
       variable: waiver_defense
       is: True
-  - Details:: waiver_defense_details
+  - Details: waiver_defense_details
     input type: area
     rows: 3
     maxlength: 200
@@ -903,55 +908,163 @@ question: |
   Refusal to accept rent payment defense
 subquestion: |
   If you tried to pay rent on time and the landlord refused to accept it, that may be a defense to the eviction.
-
-  FINISH updating fields
-
 fields:
   - Did the landlord refuse your rent payment?: rent_refusal_defense
     datatype: yesnoradio
-  - note: Explain how the landlord acted like your lease continued.
+  - note: Explain how the landlord refused your rent payment.
     show if:
-      variable: waiver_defense
+      variable: rent_refusal_defense
       is: True
-  - Date landlord signed a new lease with you:: new_lease_signed_date
+  - Date you tried to pay rent to the landlord: rent_payment_date
     datatype: date
-    required: False
     show if:
-      variable: waiver_defense
+      variable: rent_refusal_defense
       is: True
-  - Date landlord accepted your rent:: rent_accepted_date
-    datatype: date
-    required: False
+  - Rent payment amount: refused_rent_amount
+    datatype: currency
     show if:
-      variable: waiver_defense
+      variable: rent_refusal_defense
       is: True
-  - Details:: waiver_defense_details
+  - Additional details: rent_refusal_defense_details
     input type: area
     rows: 3
     maxlength: 200
     required: False
     show if:
-      variable: waiver_defense
+      variable: rent_refusal_defense
       is: True
-validation code: |
-  if rent_accepted_date == "" and new_lease_signed_date == "" and waiver_defense_details == "":
-    validation_error("You must explain how the lanlord waived the right to evict you. Please enter a date or give details.", field="waiver_defense_details")
+---
+id: other affirmative defense intro
+question: |
+  Other affirmative defenses
+subquestion: |
+  CONDITIONAL LANGUAGE
+  you listed these affirmative defenses
+  or
+  you haven't listed any affirmative defenses.
+  
+  If you have other affirmative defenses not listed above, select **Yes**. Remember, you will be responsible for proving any affirmative defense you bring up.
+  
+  An example defense is that the landlord no longer owns the rental property. Learn about other affirmative defenses by reading ILAO's article on common eviction defenses.LINK
+fields:
+  Do you have any other affirmative defenses?: other_defense
+  datatype: yesnoradio
+---
+id: affirmative defense details
+question: |
+  Affirmative defense details
+subquestion: |
+  Enter details about your affirmative defense.
+fields:
+  - Short name or description of the affirmtaive defenset: defenses[i].name.text
+    maxlength: 40
+  - Facts that support your defense:: defenses[i].details
+    input type: area
+    rows: 5
+    maxlength: 300
+---
+id: any other defenses
+question: |
+  Do you have other affirmative defenses?
+subquestion: |
+  
+  You can enter up to 4 additional affirmative defenses. So far you have told us about:
+  
+  % for defense in defenses:
+   * ${defense.name.text}
+  % endfor
+fields:
+  - "Add another affirmative defense?": defenses.there_is_another
+    datatype: yesnoradio
+---
+code: |
+  defenses[i].name.text
+  defenses[i].complete = True
+---
+code: |
+  if defenses.number_gathered() >= 4:
+    defenses.there_is_another = False
+---
+id: affirmative defense details
+question: |
+  Additional information you want the judge to consider
+subquestion: |
+  If you have other information you want to tell the judge to explain why you should not be evicted, enter it below.
+  
+  **Note:** You must still bring up all your defenses at trial.
+  
+  If you do not have other information to add, leave this blank.
+fields:
+  - no label: additional_defense_information
+    input type: area
+    rows: 7
+    maxlength: 350
+    required: False
 
 
 ---
 id: counterclaims intro
 continue button field: counterclaims_intro
 question: |
-  Counterclaims intro placeholder
+  Counterclaims
 subquestion: |
-  ADD TEXT
+  Illinois law limits what kinds of counterclaims you can raise. They generally must address the right to possession.
+
+  If the judge dismisses your counterclaim because it is not directly related to the eviction, you may have to file an additional lawsuit. To make sure you can do this, ask the judge to dismiss your counterclaim without prejudice.
+  
+  Counterclaims are like a new lawsuit against your landlord. There will likely be fees to file your counterclaims. 
 ---
-id: optional counterclaims
-continue button field: optional_counterclaims
+id: any counterclaims
 question: |
-  Do you want to file any Counterclaimss?
+  Do you want to file any counterclaims?
 subquestion: |
-  Not required by law. Only have to if you want to. 
+  You will have to state facts to explain what you are claiming. You will have to prove these facts at trial.
+  
+  As part of your counterclaims, you will have to explain why the law requires that the landlord pays you money damages and what other relief.
+fields:
+  Any counterclaims?: has_counterclaims
+  datatype: yesnoradio  
+---
+id: counterclaim details
+question: |
+  Counterclaim details
+subquestion: |
+  Enter details about your counterclaim.
+fields:
+  - State what you are claiming and the facts that support your claims:: claims[i].name.text
+    input type: area
+    rows: 5
+    maxlength: 300
+  - List what the landlord should pay you and other relief:: claims[i].details
+    input type: area
+    rows: 3
+    maxlength: 150
+---
+id: any other counterclaims
+question: |
+  Do you have other counterclaims?
+subquestion: |
+  
+  You can enter up to 5 counterclaims. So far you have told us about:
+  
+  % for claim in claims:
+   * ${claim.name.text}
+  % endfor
+fields:
+  - "Add another counterclaim?": claims.there_is_another
+    datatype: yesnoradio
+---
+code: |
+  claims[i].name.text
+  claims[i].complete = True
+---
+code: |
+  if claims.number_gathered() >= 5:
+    claims.there_is_another = False
+---
+
+
+  
 ---
 reconsider: True
 code: |
