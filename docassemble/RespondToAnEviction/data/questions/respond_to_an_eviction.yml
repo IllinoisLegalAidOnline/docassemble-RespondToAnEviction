@@ -1889,111 +1889,111 @@ attachment:
       - "defendants": ${ other_parties.full_names() if user_ask_role == 'plaintiff' else users.full_names() }
       - "case_number__1": ${ case_number }
 
-      - "para25": ${ answer_responses[25].para }
-      - "sub25": ${ answer_responses[25].sub }
-      - "admit25": ${ True if answer_responses[25].response == "Admit" else False }
-      - "deny25": ${ True if answer_responses[25].response == "Deny" else False }
-      - "idk25": ${ True if answer_responses[25].response == "Do not know" else False }
-      - "para26": ${ answer_responses[26].para }
-      - "sub26": ${ answer_responses[26].sub }
-      - "admit26": ${ True if answer_responses[26].response == "Admit" else False }
-      - "deny26": ${ True if answer_responses[26].response == "Deny" else False }
-      - "idk26": ${ True if answer_responses[26].response == "Do not know" else False }
-      - "para27": ${ answer_responses[27].para }
-      - "sub27": ${ answer_responses[27].sub }
-      - "admit27": ${ True if answer_responses[27].response == "Admit" else False }
-      - "deny27": ${ True if answer_responses[27].response == "Deny" else False }
-      - "idk27": ${ True if answer_responses[27].response == "Do not know" else False }
-      - "para28": ${ answer_responses[28].para }
-      - "sub28": ${ answer_responses[28].sub }
-      - "admit28": ${ True if answer_responses[28].response == "Admit" else False }
-      - "deny28": ${ True if answer_responses[28].response == "Deny" else False }
-      - "idk28": ${ True if answer_responses[28].response == "Do not know" else False }
-      - "para29": ${ answer_responses[29].para }
-      - "sub29": ${ answer_responses[29].sub }
-      - "admit29": ${ True if answer_responses[29].response == "Admit" else False }
-      - "deny29": ${ True if answer_responses[29].response == "Deny" else False }
-      - "idk29": ${ True if answer_responses[29].response == "Do not know" else False }
-      - "para30": ${ answer_responses[30].para }
-      - "sub30": ${ answer_responses[30].sub }
-      - "admit30": ${ True if answer_responses[30].response == "Admit" else False }
-      - "deny30": ${ True if answer_responses[30].response == "Deny" else False }
-      - "idk30": ${ True if answer_responses[30].response == "Do not know" else False }
-      - "para31": ${ answer_responses[31].para }
-      - "sub31": ${ answer_responses[31].sub }
-      - "admit31": ${ True if answer_responses[31].response == "Admit" else False }
-      - "deny31": ${ True if answer_responses[31].response == "Deny" else False }
-      - "idk31": ${ True if answer_responses[31].response == "Do not know" else False }
-      - "para32": ${ answer_responses[32].para }
-      - "sub32": ${ answer_responses[32].sub }
-      - "admit32": ${ True if answer_responses[32].response == "Admit" else False }
-      - "deny32": ${ True if answer_responses[32].response == "Deny" else False }
-      - "idk32": ${ True if answer_responses[32].response == "Do not know" else False }
-      - "para33": ${ answer_responses[33].para }
-      - "sub33": ${ answer_responses[33].sub }
-      - "admit33": ${ True if answer_responses[33].response == "Admit" else False }
-      - "deny33": ${ True if answer_responses[33].response == "Deny" else False }
-      - "idk33": ${ True if answer_responses[33].response == "Do not know" else False }
-      - "para34": ${ answer_responses[34].para }
-      - "sub34": ${ answer_responses[34].sub }
-      - "admit34": ${ True if answer_responses[34].response == "Admit" else False }
-      - "deny34": ${ True if answer_responses[34].response == "Deny" else False }
-      - "idk34": ${ True if answer_responses[34].response == "Do not know" else False }
-      - "para35": ${ answer_responses[35].para }
-      - "sub35": ${ answer_responses[35].sub }
-      - "admit35": ${ True if answer_responses[35].response == "Admit" else False }
-      - "deny35": ${ True if answer_responses[35].response == "Deny" else False }
-      - "idk35": ${ True if answer_responses[35].response == "Do not know" else False }
-      - "para36": ${ answer_responses[36].para }
-      - "sub36": ${ answer_responses[36].sub }
-      - "admit36": ${ True if answer_responses[36].response == "Admit" else False }
-      - "deny36": ${ True if answer_responses[36].response == "Deny" else False }
-      - "idk36": ${ True if answer_responses[36].response == "Do not know" else False }
-      - "para37": ${ answer_responses[37].para }
-      - "sub37": ${ answer_responses[37].sub }
-      - "admit37": ${ True if answer_responses[37].response == "Admit" else False }
-      - "deny37": ${ True if answer_responses[37].response == "Deny" else False }
-      - "idk37": ${ True if answer_responses[37].response == "Do not know" else False }
-      - "para38": ${ answer_responses[38].para }
-      - "sub38": ${ answer_responses[38].sub }
-      - "admit38": ${ True if answer_responses[38].response == "Admit" else False }
-      - "deny38": ${ True if answer_responses[38].response == "Deny" else False }
-      - "idk38": ${ True if answer_responses[38].response == "Do not know" else False }
-      - "para39": ${ answer_responses[39].para }
-      - "sub39": ${ answer_responses[39].sub }
-      - "admit39": ${ True if answer_responses[39].response == "Admit" else False }
-      - "deny39": ${ True if answer_responses[39].response == "Deny" else False }
-      - "idk39": ${ True if answer_responses[39].response == "Do not know" else False }
-      - "para40": ${ answer_responses[40].para }
-      - "sub40": ${ answer_responses[40].sub }
-      - "admit40": ${ True if answer_responses[40].response == "Admit" else False }
-      - "deny40": ${ True if answer_responses[40].response == "Deny" else False }
-      - "idk40": ${ True if answer_responses[40].response == "Do not know" else False }
-      - "para41": ${ answer_responses[41].para }
-      - "sub41": ${ answer_responses[41].sub }
-      - "admit41": ${ True if answer_responses[41].response == "Admit" else False }
-      - "deny41": ${ True if answer_responses[41].response == "Deny" else False }
-      - "idk41": ${ True if answer_responses[41].response == "Do not know" else False }
-      - "para42": ${ answer_responses[42].para }
-      - "sub42": ${ answer_responses[42].sub }
-      - "admit42": ${ True if answer_responses[42].response == "Admit" else False }
-      - "deny42": ${ True if answer_responses[42].response == "Deny" else False }
-      - "idk42": ${ True if answer_responses[42].response == "Do not know" else False }
-      - "para43": ${ answer_responses[43].para }
-      - "sub43": ${ answer_responses[43].sub }
-      - "admit43": ${ True if answer_responses[43].response == "Admit" else False }
-      - "deny43": ${ True if answer_responses[43].response == "Deny" else False }
-      - "idk43": ${ True if answer_responses[43].response == "Do not know" else False }
-      - "para44": ${ answer_responses[44].para }
-      - "sub44": ${ answer_responses[44].sub }
-      - "admit44": ${ True if answer_responses[44].response == "Admit" else False }
-      - "deny44": ${ True if answer_responses[44].response == "Deny" else False }
-      - "idk44": ${ True if answer_responses[44].response == "Do not know" else False }
-      - "para45": ${ answer_responses[45].para }
-      - "sub45": ${ answer_responses[45].sub }
-      - "admit45": ${ True if answer_responses[45].response == "Admit" else False }
-      - "deny45": ${ True if answer_responses[45].response == "Deny" else False }
-      - "idk45": ${ True if answer_responses[45].response == "Do not know" else False }
+      - "para25": ${ answer_responses[10].para }
+      - "sub25": ${ answer_responses[10].sub }
+      - "admit25": ${ True if answer_responses[10].response == "Admit" else False }
+      - "deny25": ${ True if answer_responses[10].response == "Deny" else False }
+      - "idk25": ${ True if answer_responses[10].response == "Do not know" else False }
+      - "para26": ${ answer_responses[11].para }
+      - "sub26": ${ answer_responses[11].sub }
+      - "admit26": ${ True if answer_responses[11].response == "Admit" else False }
+      - "deny26": ${ True if answer_responses[11].response == "Deny" else False }
+      - "idk26": ${ True if answer_responses[11].response == "Do not know" else False }
+      - "para27": ${ answer_responses[12].para }
+      - "sub27": ${ answer_responses[12].sub }
+      - "admit27": ${ True if answer_responses[12].response == "Admit" else False }
+      - "deny27": ${ True if answer_responses[12].response == "Deny" else False }
+      - "idk27": ${ True if answer_responses[12].response == "Do not know" else False }
+      - "para28": ${ answer_responses[13].para }
+      - "sub28": ${ answer_responses[13].sub }
+      - "admit28": ${ True if answer_responses[13].response == "Admit" else False }
+      - "deny28": ${ True if answer_responses[13].response == "Deny" else False }
+      - "idk28": ${ True if answer_responses[13].response == "Do not know" else False }
+      - "para29": ${ answer_responses[14].para }
+      - "sub29": ${ answer_responses[14].sub }
+      - "admit29": ${ True if answer_responses[14].response == "Admit" else False }
+      - "deny29": ${ True if answer_responses[14].response == "Deny" else False }
+      - "idk29": ${ True if answer_responses[14].response == "Do not know" else False }
+      - "para30": ${ answer_responses[15].para }
+      - "sub30": ${ answer_responses[15].sub }
+      - "admit30": ${ True if answer_responses[15].response == "Admit" else False }
+      - "deny30": ${ True if answer_responses[15].response == "Deny" else False }
+      - "idk30": ${ True if answer_responses[15].response == "Do not know" else False }
+      - "para31": ${ answer_responses[16].para }
+      - "sub31": ${ answer_responses[16].sub }
+      - "admit31": ${ True if answer_responses[16].response == "Admit" else False }
+      - "deny31": ${ True if answer_responses[16].response == "Deny" else False }
+      - "idk31": ${ True if answer_responses[16].response == "Do not know" else False }
+      - "para32": ${ answer_responses[17].para }
+      - "sub32": ${ answer_responses[17].sub }
+      - "admit32": ${ True if answer_responses[17].response == "Admit" else False }
+      - "deny32": ${ True if answer_responses[17].response == "Deny" else False }
+      - "idk32": ${ True if answer_responses[17].response == "Do not know" else False }
+      - "para33": ${ answer_responses[18].para }
+      - "sub33": ${ answer_responses[18].sub }
+      - "admit33": ${ True if answer_responses[18].response == "Admit" else False }
+      - "deny33": ${ True if answer_responses[18].response == "Deny" else False }
+      - "idk33": ${ True if answer_responses[18].response == "Do not know" else False }
+      - "para34": ${ answer_responses[19].para }
+      - "sub34": ${ answer_responses[19].sub }
+      - "admit34": ${ True if answer_responses[19].response == "Admit" else False }
+      - "deny34": ${ True if answer_responses[19].response == "Deny" else False }
+      - "idk34": ${ True if answer_responses[19].response == "Do not know" else False }
+      - "para35": ${ answer_responses[20].para }
+      - "sub35": ${ answer_responses[20].sub }
+      - "admit35": ${ True if answer_responses[20].response == "Admit" else False }
+      - "deny35": ${ True if answer_responses[20].response == "Deny" else False }
+      - "idk35": ${ True if answer_responses[20].response == "Do not know" else False }
+      - "para36": ${ answer_responses[21].para }
+      - "sub36": ${ answer_responses[21].sub }
+      - "admit36": ${ True if answer_responses[21].response == "Admit" else False }
+      - "deny36": ${ True if answer_responses[21].response == "Deny" else False }
+      - "idk36": ${ True if answer_responses[21].response == "Do not know" else False }
+      - "para37": ${ answer_responses[22].para }
+      - "sub37": ${ answer_responses[22].sub }
+      - "admit37": ${ True if answer_responses[22].response == "Admit" else False }
+      - "deny37": ${ True if answer_responses[22].response == "Deny" else False }
+      - "idk37": ${ True if answer_responses[22].response == "Do not know" else False }
+      - "para38": ${ answer_responses[23].para }
+      - "sub38": ${ answer_responses[23].sub }
+      - "admit38": ${ True if answer_responses[23].response == "Admit" else False }
+      - "deny38": ${ True if answer_responses[23].response == "Deny" else False }
+      - "idk38": ${ True if answer_responses[23].response == "Do not know" else False }
+      - "para39": ${ answer_responses[24].para }
+      - "sub39": ${ answer_responses[24].sub }
+      - "admit39": ${ True if answer_responses[24].response == "Admit" else False }
+      - "deny39": ${ True if answer_responses[24].response == "Deny" else False }
+      - "idk39": ${ True if answer_responses[24].response == "Do not know" else False }
+      - "para40": ${ answer_responses[25].para }
+      - "sub40": ${ answer_responses[25].sub }
+      - "admit40": ${ True if answer_responses[25].response == "Admit" else False }
+      - "deny40": ${ True if answer_responses[25].response == "Deny" else False }
+      - "idk40": ${ True if answer_responses[25].response == "Do not know" else False }
+      - "para41": ${ answer_responses[26].para }
+      - "sub41": ${ answer_responses[26].sub }
+      - "admit41": ${ True if answer_responses[26].response == "Admit" else False }
+      - "deny41": ${ True if answer_responses[26].response == "Deny" else False }
+      - "idk41": ${ True if answer_responses[26].response == "Do not know" else False }
+      - "para42": ${ answer_responses[27].para }
+      - "sub42": ${ answer_responses[27].sub }
+      - "admit42": ${ True if answer_responses[27].response == "Admit" else False }
+      - "deny42": ${ True if answer_responses[27].response == "Deny" else False }
+      - "idk42": ${ True if answer_responses[27].response == "Do not know" else False }
+      - "para43": ${ answer_responses[28].para }
+      - "sub43": ${ answer_responses[28].sub }
+      - "admit43": ${ True if answer_responses[28].response == "Admit" else False }
+      - "deny43": ${ True if answer_responses[28].response == "Deny" else False }
+      - "idk43": ${ True if answer_responses[28].response == "Do not know" else False }
+      - "para44": ${ answer_responses[29].para }
+      - "sub44": ${ answer_responses[29].sub }
+      - "admit44": ${ True if answer_responses[29].response == "Admit" else False }
+      - "deny44": ${ True if answer_responses[29].response == "Deny" else False }
+      - "idk44": ${ True if answer_responses[29].response == "Do not know" else False }
+      - "para45": ${ answer_responses[30].para }
+      - "sub45": ${ answer_responses[30].sub }
+      - "admit45": ${ True if answer_responses[30].response == "Admit" else False }
+      - "deny45": ${ True if answer_responses[30].response == "Deny" else False }
+      - "idk45": ${ True if answer_responses[30].response == "Do not know" else False }
 	  
 
 ---
