@@ -1396,7 +1396,7 @@ under: |
 generic object: ALDocumentBundle
 template: x.send_email_template
 subject: |
-  Appearance and Eviction Answer forms
+  Respond to an eviction forms
 content: |
   Your forms are attached.
   
