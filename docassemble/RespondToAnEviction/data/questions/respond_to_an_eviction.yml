@@ -41,7 +41,7 @@ sections:
   - section_case_info: Case info
   - section_answer: Responses
   - section_defenses: Affirmative defenses
-  - section_counterclaims: Counterclaims
+  - section_counterclaims: Counterclaims (optional)
   - section_delivery: Delivery details
   - section_about_you: About you
   - section_download: Download  
@@ -813,8 +813,9 @@ fields:
       I am protected from retaliation by a **local ordinance**. My landlord retaliated against me because I complained to someone about housing conditions or a violation within my unit.
     field: retaliation_local
     datatype: yesnowide  
-  - Municipality or county where the property is located: retaliation_ordinance
+  - Municipality or county ordinance where the property is located: retaliation_ordinance
     maxlength: 25
+    required: False
     show if:
       variable: retaliation_local
       is: True
@@ -893,7 +894,7 @@ fields:
       is: True
   - Details: waiver_defense_details
     input type: area
-    rows: 3
+    rows: 5
     maxlength: 200
     required: False
     show if:
@@ -927,7 +928,7 @@ fields:
       is: True
   - Additional details: rent_refusal_defense_details
     input type: area
-    rows: 3
+    rows: 5
     maxlength: 200
     required: False
     show if:
@@ -984,7 +985,7 @@ fields:
     maxlength: 40
   - Facts that support your defense:: defenses[i].details
     input type: area
-    rows: 5
+    rows: 7
     maxlength: 300
 ---
 id: any other defenses
@@ -1015,7 +1016,7 @@ question: |
 subquestion: |
   If you have other information you want to tell the judge to explain why you should not be evicted, enter it below.
   
-  **Note:** You must still bring up all your defenses at trial.
+  **Note:** Even if defenses are listed on your forms, you must still bring up all your defenses at trial.
   
   If you do not have other information to add, leave this blank.
 fields:
@@ -1399,18 +1400,22 @@ objects:
   - illinois_appearance_additional_2: ALDocument.using(title="Additional Proof of Delivery 2", filename="appearance_additional_proof_delivery_2.pdf", has_addendum=False)
   - illinois_appearance_additional_3: ALDocument.using(title="Additional Proof of Delivery 3", filename="appearance_additional_proof_delivery_3.pdf", has_addendum=False)
   - illinois_appearance_additional_blank: ALDocument.using(title="Additional Proof of Delivery (blank)", filename="appearance_additional_proof_delivery_blank.pdf", has_addendum=False)
-  - illinois_answer_attachment: ALDocument.using(title="Answer", filename="answer.pdf", has_addendum=False)
+  - eviction_answer: ALDocument.using(title="Answer", filename="eviction_answer.pdf", has_addendum=False)
   - illinois_answer_additional: ALDocument.using(title="Additional Paragraphs for Answer", filename="answer_additional.pdf", has_addendum=False)
+  - additional_defenses_counterclaims: ALDocument.using(title="Additional Defenses and Counterlcaims", filename="additional_defenses_counterclaims.pdf", has_addendum=False)
+  - additional_conditions: ALDocument.using(title="Additional Conditions", filename="additional_conditions.pdf", has_addendum=False)
 ---
 code: |
-  instructions = True
+  instructions.enabled = True
   illinois_appearance_attachment.enabled = False
   illinois_appearance_additional.enabled = False
   illinois_appearance_additional_2.enabled = False
   illinois_appearance_additional_3.enabled = False
   illinois_appearance_additional_blank.enabled = False
-  illinois_answer_attachment.enabled = False
+  eviction_answer.enabled = False
   illinois_answer_additional.enabled = False
+  additional_defenses_counterclaims.enabled = False
+  additional_conditions.enabled = False
 
   if delivery_parties.number() < 3:
     illinois_appearance_attachment.enabled = True
@@ -1432,12 +1437,17 @@ code: |
     illinois_appearance_additional_2.enabled = True
     illinois_appearance_additional_3.enabled = True
     illinois_appearance_additional_blank.enabled = True
-    
-  if answer_responses.number() < 25:
-    illinois_answer_attachment.enabled = True
-  else:
-    illinois_answer_attachment.enabled = True
-    illinois_answer_additional.enabled = True
+
+  eviction_answer.enabled = True
+  if general_denial == False:
+    if answer_responses.number() > 10:
+      illinois_answer_additional.enabled = True
+  
+  if claims.number() > 1 or defenses.number() > 1:
+    additional_defenses_counterclaims.enabled = True
+  
+  if conditions.number() > 3:
+    additional_conditions.enabled = True
     
 ---
 objects:
@@ -1446,7 +1456,7 @@ objects:
 ---
 objects:
   - illinois_appearance_single_pdf_bundle: ALDocumentBundle.using(elements=[illinois_appearance_attachment, illinois_appearance_additional, illinois_appearance_additional_2, illinois_appearance_additional_3], filename="appearance.pdf", title="Appearance", enabled=True)
-  - illinois_answer_bundle: ALDocumentBundle.using(elements=[illinois_answer_attachment, illinois_answer_additional, illinois_appearance_additional, illinois_appearance_additional_2, illinois_appearance_additional_3], filename="answer.pdf", title="Answer", enabled=True)
+  - illinois_answer_bundle: ALDocumentBundle.using(elements=[eviction_answer, illinois_answer_additional, additional_conditions, additional_defenses_counterclaims,  illinois_appearance_additional, illinois_appearance_additional_2, illinois_appearance_additional_3], filename="eviction_answer.pdf", title="Eviction Answer", enabled=True)
 ---
 attachment:
   variable name: instructions[i]
@@ -1707,198 +1717,171 @@ attachment:
       - "trial_court_county": ${ "" }
 ---
 attachment:
-  variable name: illinois_answer_attachment[i]
-  name: illinois_answer_attachment
-  filename: answer
+  variable name: eviction_answer[i]
+  name: eviction_answer
+  filename: eviction_answer
   skip undefined: True
   editable: False
-  pdf template file: answer.pdf
+  pdf template file: eviction_answer.pdf
   fields:
-      - "trial_court_county": ${ trial_court.address.county.upper() }
-      - "plaintiffs": ${ users.full_names() if user_ask_role == 'plaintiff' else other_parties.full_names() }
-      - "defendants": ${ other_parties.full_names() if user_ask_role == 'plaintiff' else users.full_names() }
-      - "user__1": ${ users[0].name.full(middle="full") }
-      - "user__2": ${ users[0].name.full(middle="full") }
-      - "user__3": ${ users[0].name.full(middle="full") }
-      - "user_mail_address_line_one__1": ${ users[0].address.line_one(bare=True) }
-      - "user_mail_address_line_one__2": ${ users[0].address.line_one(bare=True) }
-      - "user_mail_address_city_state_zip__1": ${ users[0].address.line_two() }
-      - "user_mail_address_city_state_zip__2": ${ users[0].address.line_two() }
-      - "user_phone_number__1": ${ phone_number_formatted(users[0].phone_number) }
-      - "user_phone_number__2": ${ phone_number_formatted(users[0].phone_number) }
-      - "user_email": ${ users[0].email if users[0].email_notice else '' }
-      - "user_email__2": ${ users[0].email if users[0].email_notice else '' }
-      - "case_number__1": ${ case_number }
-      - "case_number__2": ${ case_number }
-      - "case_number__3": ${ case_number }
-      
-      - "para0": ${ answer_responses[0].para }
-      - "sub0": ${ answer_responses[0].sub }
-      - "admit0": ${ True if answer_responses[0].response == "Admit" else False }
-      - "deny0": ${ True if answer_responses[0].response == "Deny" else False }
-      - "idk0": ${ True if answer_responses[0].response == "Do not know" else False }
-      - "para1": ${ answer_responses[1].para }
-      - "sub1": ${ answer_responses[1].sub }
-      - "admit1": ${ True if answer_responses[1].response == "Admit" else False }
-      - "deny1": ${ True if answer_responses[1].response == "Deny" else False }
-      - "idk1": ${ True if answer_responses[1].response == "Do not know" else False }
-      - "para2": ${ answer_responses[2].para }
-      - "sub2": ${ answer_responses[2].sub }
-      - "admit2": ${ True if answer_responses[2].response == "Admit" else False }
-      - "deny2": ${ True if answer_responses[2].response == "Deny" else False }
-      - "idk2": ${ True if answer_responses[2].response == "Do not know" else False }
-      - "para3": ${ answer_responses[3].para }
-      - "sub3": ${ answer_responses[3].sub }
-      - "admit3": ${ True if answer_responses[3].response == "Admit" else False }
-      - "deny3": ${ True if answer_responses[3].response == "Deny" else False }
-      - "idk3": ${ True if answer_responses[3].response == "Do not know" else False }
-      - "para4": ${ answer_responses[4].para }
-      - "sub4": ${ answer_responses[4].sub }
-      - "admit4": ${ True if answer_responses[4].response == "Admit" else False }
-      - "deny4": ${ True if answer_responses[4].response == "Deny" else False }
-      - "idk4": ${ True if answer_responses[4].response == "Do not know" else False }
-      - "para5": ${ answer_responses[5].para }
-      - "sub5": ${ answer_responses[5].sub }
-      - "admit5": ${ True if answer_responses[5].response == "Admit" else False }
-      - "deny5": ${ True if answer_responses[5].response == "Deny" else False }
-      - "idk5": ${ True if answer_responses[5].response == "Do not know" else False }
-      - "para6": ${ answer_responses[6].para }
-      - "sub6": ${ answer_responses[6].sub }
-      - "admit6": ${ True if answer_responses[6].response == "Admit" else False }
-      - "deny6": ${ True if answer_responses[6].response == "Deny" else False }
-      - "idk6": ${ True if answer_responses[6].response == "Do not know" else False }
-      - "para7": ${ answer_responses[7].para }
-      - "sub7": ${ answer_responses[7].sub }
-      - "admit7": ${ True if answer_responses[7].response == "Admit" else False }
-      - "deny7": ${ True if answer_responses[7].response == "Deny" else False }
-      - "idk7": ${ True if answer_responses[7].response == "Do not know" else False }
-      - "para8": ${ answer_responses[8].para }
-      - "sub8": ${ answer_responses[8].sub }
-      - "admit8": ${ True if answer_responses[8].response == "Admit" else False }
-      - "deny8": ${ True if answer_responses[8].response == "Deny" else False }
-      - "idk8": ${ True if answer_responses[8].response == "Do not know" else False }
-      - "para9": ${ answer_responses[9].para }
-      - "sub9": ${ answer_responses[9].sub }
-      - "admit9": ${ True if answer_responses[9].response == "Admit" else False }
-      - "deny9": ${ True if answer_responses[9].response == "Deny" else False }
-      - "idk9": ${ True if answer_responses[9].response == "Do not know" else False }
-      - "para10": ${ answer_responses[10].para }
-      - "sub10": ${ answer_responses[10].sub }
-      - "admit10": ${ True if answer_responses[10].response == "Admit" else False }
-      - "deny10": ${ True if answer_responses[10].response == "Deny" else False }
-      - "idk10": ${ True if answer_responses[10].response == "Do not know" else False }
-      - "para11": ${ answer_responses[11].para }
-      - "sub11": ${ answer_responses[11].sub }
-      - "admit11": ${ True if answer_responses[11].response == "Admit" else False }
-      - "deny11": ${ True if answer_responses[11].response == "Deny" else False }
-      - "idk11": ${ True if answer_responses[11].response == "Do not know" else False }
-      - "para12": ${ answer_responses[12].para }
-      - "sub12": ${ answer_responses[12].sub }
-      - "admit12": ${ True if answer_responses[12].response == "Admit" else False }
-      - "deny12": ${ True if answer_responses[12].response == "Deny" else False }
-      - "idk12": ${ True if answer_responses[12].response == "Do not know" else False }
-      - "para13": ${ answer_responses[13].para }
-      - "sub13": ${ answer_responses[13].sub }
-      - "admit13": ${ True if answer_responses[13].response == "Admit" else False }
-      - "deny13": ${ True if answer_responses[13].response == "Deny" else False }
-      - "idk13": ${ True if answer_responses[13].response == "Do not know" else False }
-      - "para14": ${ answer_responses[14].para }
-      - "sub14": ${ answer_responses[14].sub }
-      - "admit14": ${ True if answer_responses[14].response == "Admit" else False }
-      - "deny14": ${ True if answer_responses[14].response == "Deny" else False }
-      - "idk14": ${ True if answer_responses[14].response == "Do not know" else False }
-      - "para15": ${ answer_responses[15].para }
-      - "sub15": ${ answer_responses[15].sub }
-      - "admit15": ${ True if answer_responses[15].response == "Admit" else False }
-      - "deny15": ${ True if answer_responses[15].response == "Deny" else False }
-      - "idk15": ${ True if answer_responses[15].response == "Do not know" else False }
-      - "para16": ${ answer_responses[16].para }
-      - "sub16": ${ answer_responses[16].sub }
-      - "admit16": ${ True if answer_responses[16].response == "Admit" else False }
-      - "deny16": ${ True if answer_responses[16].response == "Deny" else False }
-      - "idk16": ${ True if answer_responses[16].response == "Do not know" else False }
-      - "para17": ${ answer_responses[17].para }
-      - "sub17": ${ answer_responses[17].sub }
-      - "admit17": ${ True if answer_responses[17].response == "Admit" else False }
-      - "deny17": ${ True if answer_responses[17].response == "Deny" else False }
-      - "idk17": ${ True if answer_responses[17].response == "Do not know" else False }
-      - "para18": ${ answer_responses[18].para }
-      - "sub18": ${ answer_responses[18].sub }
-      - "admit18": ${ True if answer_responses[18].response == "Admit" else False }
-      - "deny18": ${ True if answer_responses[18].response == "Deny" else False }
-      - "idk18": ${ True if answer_responses[18].response == "Do not know" else False }
-      - "para19": ${ answer_responses[19].para }
-      - "sub19": ${ answer_responses[19].sub }
-      - "admit19": ${ True if answer_responses[19].response == "Admit" else False }
-      - "deny19": ${ True if answer_responses[19].response == "Deny" else False }
-      - "idk19": ${ True if answer_responses[19].response == "Do not know" else False }
-      - "para20": ${ answer_responses[20].para }
-      - "sub20": ${ answer_responses[20].sub }
-      - "admit20": ${ True if answer_responses[20].response == "Admit" else False }
-      - "deny20": ${ True if answer_responses[20].response == "Deny" else False }
-      - "idk20": ${ True if answer_responses[20].response == "Do not know" else False }
-      - "para21": ${ answer_responses[21].para }
-      - "sub21": ${ answer_responses[21].sub }
-      - "admit21": ${ True if answer_responses[21].response == "Admit" else False }
-      - "deny21": ${ True if answer_responses[21].response == "Deny" else False }
-      - "idk21": ${ True if answer_responses[21].response == "Do not know" else False }
-      - "para22": ${ answer_responses[22].para }
-      - "sub22": ${ answer_responses[22].sub }
-      - "admit22": ${ True if answer_responses[22].response == "Admit" else False }
-      - "deny22": ${ True if answer_responses[22].response == "Deny" else False }
-      - "idk22": ${ True if answer_responses[22].response == "Do not know" else False }
-      - "para23": ${ answer_responses[23].para }
-      - "sub23": ${ answer_responses[23].sub }
-      - "admit23": ${ True if answer_responses[23].response == "Admit" else False }
-      - "deny23": ${ True if answer_responses[23].response == "Deny" else False }
-      - "idk23": ${ True if answer_responses[23].response == "Do not know" else False }
-      - "para24": ${ answer_responses[24].para }
-      - "sub24": ${ answer_responses[24].sub }
-      - "admit24": ${ True if answer_responses[24].response == "Admit" else False }
-      - "deny24": ${ True if answer_responses[24].response == "Deny" else False }
-      - "idk24": ${ True if answer_responses[24].response == "Do not know" else False }
+    - "trial_court_county": ${ trial_court.address.county.upper() }
+    - "plaintiffs": ${ users.full_names() if user_ask_role == 'plaintiff' else other_parties.full_names() }
+    - "defendants": ${ other_parties.full_names() if user_ask_role == 'plaintiff' else users.full_names() }
+    - "user__1": ${ users[0].name.full(middle="full") }
+    - "user__2": ${ users[0].name.full(middle="full") }
+    - "user__3": ${ users[0].name.full(middle="full") }
+    - "user_mail_address_line_one__1": ${ users[0].address.line_one(bare=True) }
+    - "user_mail_address_line_one__2": ${ users[0].address.line_one(bare=True) }
+    - "user_mail_address_city_state_zip__1": ${ users[0].address.line_two() }
+    - "user_mail_address_city_state_zip__2": ${ users[0].address.line_two() }
+    - "user_phone_number__1": ${ phone_number_formatted(users[0].phone_number) }
+    - "user_phone_number__2": ${ phone_number_formatted(users[0].phone_number) }
+    - "user_email": ${ users[0].email if users[0].email_notice else '' }
+    - "user_email__2": ${ users[0].email if users[0].email_notice else '' }
+    - "case_number__1": ${ case_number }
+    - "case_number__2": ${ case_number }
+    - "case_number__3": ${ case_number }
+    - "case_number__4": ${ case_number }
+    - "case_number__5": ${ case_number }
+    - "unknown_occupants_cb": ${ unknown_occupants }
+    - "property_address": ${ rental_property.on_one_line(bare=True) }
+    - "general_denial_cb": ${ '' }
+    - "specific_para_answer_cb": ${ '' }
+          
+    - "para0": ${ answer_responses[0].para }
+    - "sub0": ${ answer_responses[0].sub }
+    - "admit0": ${ True if answer_responses[0].response == "Admit" else False }
+    - "deny0": ${ True if answer_responses[0].response == "Deny" else False }
+    - "idk0": ${ True if answer_responses[0].response == "Do not know" else False }
+    - "para1": ${ answer_responses[1].para }
+    - "sub1": ${ answer_responses[1].sub }
+    - "admit1": ${ True if answer_responses[1].response == "Admit" else False }
+    - "deny1": ${ True if answer_responses[1].response == "Deny" else False }
+    - "idk1": ${ True if answer_responses[1].response == "Do not know" else False }
+    - "para2": ${ answer_responses[2].para }
+    - "sub2": ${ answer_responses[2].sub }
+    - "admit2": ${ True if answer_responses[2].response == "Admit" else False }
+    - "deny2": ${ True if answer_responses[2].response == "Deny" else False }
+    - "idk2": ${ True if answer_responses[2].response == "Do not know" else False }
+    - "para3": ${ answer_responses[3].para }
+    - "sub3": ${ answer_responses[3].sub }
+    - "admit3": ${ True if answer_responses[3].response == "Admit" else False }
+    - "deny3": ${ True if answer_responses[3].response == "Deny" else False }
+    - "idk3": ${ True if answer_responses[3].response == "Do not know" else False }
+    - "para4": ${ answer_responses[4].para }
+    - "sub4": ${ answer_responses[4].sub }
+    - "admit4": ${ True if answer_responses[4].response == "Admit" else False }
+    - "deny4": ${ True if answer_responses[4].response == "Deny" else False }
+    - "idk4": ${ True if answer_responses[4].response == "Do not know" else False }
+    - "para5": ${ answer_responses[5].para }
+    - "sub5": ${ answer_responses[5].sub }
+    - "admit5": ${ True if answer_responses[5].response == "Admit" else False }
+    - "deny5": ${ True if answer_responses[5].response == "Deny" else False }
+    - "idk5": ${ True if answer_responses[5].response == "Do not know" else False }
+    - "para6": ${ answer_responses[6].para }
+    - "sub6": ${ answer_responses[6].sub }
+    - "admit6": ${ True if answer_responses[6].response == "Admit" else False }
+    - "deny6": ${ True if answer_responses[6].response == "Deny" else False }
+    - "idk6": ${ True if answer_responses[6].response == "Do not know" else False }
+    - "para7": ${ answer_responses[7].para }
+    - "sub7": ${ answer_responses[7].sub }
+    - "admit7": ${ True if answer_responses[7].response == "Admit" else False }
+    - "deny7": ${ True if answer_responses[7].response == "Deny" else False }
+    - "idk7": ${ True if answer_responses[7].response == "Do not know" else False }
+    - "para8": ${ answer_responses[8].para }
+    - "sub8": ${ answer_responses[8].sub }
+    - "admit8": ${ True if answer_responses[8].response == "Admit" else False }
+    - "deny8": ${ True if answer_responses[8].response == "Deny" else False }
+    - "idk8": ${ True if answer_responses[8].response == "Do not know" else False }
+    - "para9": ${ answer_responses[9].para }
+    - "sub9": ${ answer_responses[9].sub }
+    - "admit9": ${ True if answer_responses[9].response == "Admit" else False }
+    - "deny9": ${ True if answer_responses[9].response == "Deny" else False }
+    - "idk9": ${ True if answer_responses[9].response == "Do not know" else False }
+    - "para10": ${ answer_responses[10].para }
+    - "sub10": ${ answer_responses[10].sub }
+    - "admit10": ${ True if answer_responses[10].response == "Admit" else False }
+    - "deny10": ${ True if answer_responses[10].response == "Deny" else False }
+    - "idk10": ${ True if answer_responses[10].response == "Do not know" else False }
+    - "additional_answer_cb": ${ answer_responses.number() > 10 }
 
-      - "is_additional_answer": ${ answer_responses.number() > 24 }
-      - "e_sign_name__1": ${ users[0].name.full(middle="full") if e_signature else '' }
-      - "e_sign_name__2": ${ users[0].name.full(middle="full") if e_signature else '' }
-      #- "is_email_notice_yes": ${ users[0].email_notice }
+    - "notice_cb": ${ notice_defense.any_true() }
+    - "no_notice": ${ notice_defense["no_notice"] }
+    - "improper_service": ${ notice_defense["improper_service"] }
+    - "improper_notice": ${ notice_defense["improper_notice"] }
+    - "inadequate_notice": ${ notice_defense["inadequate_notice"] }
+	
+    - "cure_cb": ${ cure_defense }
+    - "cure_details": ${ cure_defense_details if cure_defense else '' }
 
-      - "delivery_party1_name_full": | 
-          % if delivery_parties[0].is_represented:
-          ${ delivery_parties[0].lawyer.name.full(middle="full") }, (lawyer for ${ delivery_parties[0].name.full(middle="full") })
-          % else:
-          ${ delivery_parties[0].name.full(middle="full") }
-          % endif
-      - "delivery_party1_mail_address_on_one_line": ${ delivery_parties[0].address.on_one_line(bare=True) }
-      - "delivery_party1_email": ${ delivery_parties[0].delivery_email if delivery_parties[0].knows_delivery_method else '' }
-      - "is_delivery_party1_hand_yes": ${ delivery_parties[0].hand_delivery if delivery_parties[0].knows_delivery_method else '' }
-      - "is_delivery_party1_mail_yes": ${ delivery_parties[0].mail_delivery if delivery_parties[0].knows_delivery_method else '' }
-      - "is_delivery_party1_efm_yes": ${ delivery_parties[0].efm_delivery if delivery_parties[0].knows_delivery_method else '' }
-      - "is_delivery_party1_email_yes": ${ delivery_parties[0].email_delivery if delivery_parties[0].knows_delivery_method else '' }
-      - "delivery_party1_date": ${ delivery_parties[0].delivery_date if delivery_parties[0].knows_delivery_method and delivery_parties[0].knows_delivery_date else '' }
-      - "delivery_party1_time": ${ format_time(delivery_parties[0].delivery_time, format='h:mm') if delivery_parties[0].knows_delivery_method and delivery_parties[0].knows_delivery_time else '' }
-      - "is_delivery_party1_am_yes": ${ True if delivery_parties[0].knows_delivery_method and format_time(delivery_parties[0].delivery_time, format='a')=='AM' else '' }
-      - "is_delivery_party1_am_no": ${ True if delivery_parties[0].knows_delivery_method and format_time(delivery_parties[0].delivery_time, format='a')=='PM' else '' }
+    - "conditions_cb": ${ conditions_defense }
+    - "conditions_detail_1": ${ conditions[0].name.text if conditions_defense else '' }
+    - "conditions_detail_2": ${ conditions[1].name.text if conditions_defense else '' }
+    - "conditions_detail_3": ${ conditions[2].name.text if conditions_defense else '' }
+    - "conditions_start_1": ${ conditions[0].date_started if conditions_defense else '' }
+    - "conditions_start_2": ${ conditions[1].date_started if conditions_defense else '' }
+    - "conditions_start_3": ${ conditions[2].date_started if conditions_defense else '' }
+    - "conconditions_fixed_1": ${ conditions[0].date_fixed if conditions_defense else '' }
+    - "conconditions_fixed_2": ${ conditions[1].date_fixed if conditions_defense else '' }
+    - "conconditions_fixed_3": ${ conditions[2].date_fixed if conditions_defense else '' }
+    - "additional_conditions": ${ conditions.number() > 3 }
 
-      - "delivery_party2_name_full": | 
-          % if delivery_parties[1].is_represented:
-          ${ delivery_parties[1].lawyer.name.full(middle="full") }, (lawyer for ${ delivery_parties[1].name.full(middle="full") })
-          % else:
-          ${ delivery_parties[1].name.full(middle="full") }
-          % endif
-      - "delivery_party2_mail_address_on_one_line": ${ delivery_parties[1].address.on_one_line(bare=True) }
-      - "delivery_party2_email": ${ delivery_parties[1].delivery_email if delivery_parties[1].knows_delivery_method else '' }
-      - "is_delivery_party2_hand_yes": ${ delivery_parties[1].hand_delivery if delivery_parties[1].knows_delivery_method else '' }
-      - "is_delivery_party2_mail_yes": ${ delivery_parties[1].mail_delivery if delivery_parties[1].knows_delivery_method else '' }
-      - "is_delivery_party2_efm_yes": ${ delivery_parties[1].efm_delivery if delivery_parties[1].knows_delivery_method else '' }
-      - "is_delivery_party2_email_yes": ${ delivery_parties[1].email_delivery if delivery_parties[1].knows_delivery_method else '' }
-      - "delivery_party2_date": ${ delivery_parties[1].delivery_date if delivery_parties[1].knows_delivery_method and delivery_parties[1].knows_delivery_date else '' }
-      - "delivery_party2_time": ${ format_time(delivery_parties[1].delivery_time, format='h:mm') if delivery_parties[1].knows_delivery_method and delivery_parties[1].knows_delivery_time else '' }
-      - "is_delivery_party2_am_yes": ${ True if delivery_parties[1].knows_delivery_method and format_time(delivery_parties[1].delivery_time, format='a')=='AM' else '' }
-      - "is_delivery_party2_am_no": ${ True if delivery_parties[1].knows_delivery_method and format_time(delivery_parties[1].delivery_time, format='a')=='PM' else '' }
+    - "retaliation_cb": ${ retaliation_state or retaliation_local }
+    - "retaliation_state": ${ retaliation_state }
+    - "retaliation_local": ${ retaliation_local }
+    - "retaliation_ordinance": ${ retaliation_ordinance if retaliation_local else '' }
+    - "retaliation_landlord": ${ retaliation_complain_to["landlord"] and retaliation_local }
+    - "retaliation_legal_org": ${ retaliation_complain_to["legal_org"] and retaliation_local }
+    - "retaliation_community_group": ${ retaliation_complain_to["community_group"] and retaliation_local }
+    - "retaliation_government": ${ retaliation_complain_to["government"] and retaliation_local }
+    - "retaliation_media": ${ retaliation_complain_to["media"] and retaliation_local }
+    - "retaliation_tenants_org": ${ retaliation_complain_to["tenants_org"] and retaliation_local }
+    - "retaliation_other": ${ retaliation_complain_to["other"] and retaliation_local }
+    - "retaliation_complain_to_other": ${ retaliation_complain_to_other if retaliation_complain_to["other"] and retaliation_local else '' }
+    - "retaliation_activity": ${ retaliation_activity and retaliation_local }
+    - "retaliation_activity_name": ${ retaliation_activity_name if retaliation_activity and retaliation_local else '' }
+    - "retaliation_details": ${ retaliation_details if retaliation_state or retaliation_local else '' }
 
-      - "is_additional_proof_delivery_yes": ${ delivery_parties.number() > 2 }
+    - "waiver_cb": ${ waiver_defense }
+    - "new_lease_date": ${ new_lease_signed_date if waiver_defense else '' }
+    - "rent_accepted_date": ${ rent_accepted_date if waiver_defense else '' }
+    - "waiver_defense_details": ${ waiver_defense_details if waiver_defense else '' }
 
+    - "rent_refusal_cb": ${ rent_refusal_defense }
+    - "rent_payment_date": ${ rent_payment_date if rent_refusal_defense else '' }
+    - "refused_rent_amount": ${ currency(refused_rent_amount) if rent_refusal_defense else '' }
+    - "rent_refusal_defense_details": ${ rent_refusal_defense_details if rent_refusal_defense else '' }
+
+    - "other_defense_cb": ${ other_defense }
+    - "other_defense_name_1": ${ defenses[0].name.text if other_defense else '' }
+    - "other_defense_details_1": ${ defenses[0].details if other_defense else '' }
+    - "additional_affirmative_defenses": ${ defenses.number() > 1 }
+    - "additional_defense_information": ${ additional_defense_information }
+
+    - "has_counterclaims": ${ has_counterclaims }
+    - "claim_text_1": ${ claims[0].name.text if has_counterclaims else '' }
+    - "claim_relief_1": ${ claims[0].details if has_counterclaims else '' }
+    - "additional_counterclaims": ${ claims.number() > 1 }
+
+    - "e_sign_name__1": ${ users[0].name.full(middle="full") if e_signature else '' }
+    - "e_sign_name__2": ${ users[0].name.full(middle="full") if e_signature else '' }
+    - "delivery_party1_name_full": | 
+        % if delivery_parties[0].is_represented:
+        ${ delivery_parties[0].lawyer.name.full(middle="full") }, (lawyer for ${ delivery_parties[0].name.full(middle="full") })
+        % else:
+        ${ delivery_parties[0].name.full(middle="full") }
+        % endif
+    - "delivery_party1_mail_address_on_one_line": ${ delivery_parties[0].address.on_one_line(bare=True) }
+    - "delivery_party1_email": ${ delivery_parties[0].delivery_email if delivery_parties[0].knows_delivery_method else '' }
+    - "is_delivery_party1_hand_yes": ${ delivery_parties[0].hand_delivery if delivery_parties[0].knows_delivery_method else '' }
+    - "is_delivery_party1_mail_yes": ${ delivery_parties[0].mail_delivery if delivery_parties[0].knows_delivery_method else '' }
+    - "is_delivery_party1_efm_yes": ${ delivery_parties[0].efm_delivery if delivery_parties[0].knows_delivery_method else '' }
+    - "is_delivery_party1_email_yes": ${ delivery_parties[0].email_delivery if delivery_parties[0].knows_delivery_method else '' }
+    - "delivery_party1_date": ${ delivery_parties[0].delivery_date if delivery_parties[0].knows_delivery_method and delivery_parties[0].knows_delivery_date else '' }
+    - "delivery_party1_time": ${ format_time(delivery_parties[0].delivery_time, format='h:mm') if delivery_parties[0].knows_delivery_method and delivery_parties[0].knows_delivery_time else '' }
+    - "is_delivery_party1_am_yes": ${ True if delivery_parties[0].knows_delivery_method and format_time(delivery_parties[0].delivery_time, format='a')=='AM' else '' }
+    - "is_delivery_party1_am_no": ${ True if delivery_parties[0].knows_delivery_method and format_time(delivery_parties[0].delivery_time, format='a')=='PM' else '' }
+    - "is_additional_proof_delivery_yes": ${ delivery_parties.number() > 1 }
 ---
 attachment:
   variable name: illinois_answer_additional[i]
@@ -2018,10 +2001,94 @@ attachment:
       - "admit45": ${ True if answer_responses[30].response == "Admit" else False }
       - "deny45": ${ True if answer_responses[30].response == "Deny" else False }
       - "idk45": ${ True if answer_responses[30].response == "Do not know" else False }
-	  
+---
+attachment:
+  variable name: additional_defenses_counterclaims[i]
+  name: additional_defenses_counterclaims
+  filename: additional_defenses_counterclaims
+  skip undefined: True
+  editable: False
+  pdf template file: additional_defenses_counterclaims.pdf
+  fields:
+    - "trial_court_county": ${ trial_court.address.county.upper() }
+    - "plaintiffs": ${ users.full_names() if user_ask_role == 'plaintiff' else other_parties.full_names() }
+    - "defendants": ${ other_parties.full_names() if user_ask_role == 'plaintiff' else users.full_names() }
+    - "case_number__1": ${ case_number }
+    - "case_number__2": ${ case_number }
+    - "unknown_occupants_cb": ${ unknown_occupants }
+    - "property_address": ${ rental_property.on_one_line(bare=True) }
+    
+    - "claim_relief_2": ${ claims[1].details if has_counterclaims else '' }
+    - "claim_relief_3": ${ claims[2].details if has_counterclaims else '' }
+    - "claim_relief_4": ${ claims[3].details if has_counterclaims else '' }
+    - "claim_text_2": ${ claims[1].name.text if has_counterclaims else '' }
+    - "claim_text_3": ${ claims[2].name.text if has_counterclaims else '' }
+    - "claim_text_4": ${ claims[3].name.text if has_counterclaims else '' }
+    - "other_defense_details_2": ${ defenses[1].details if other_defense else '' }
+    - "other_defense_details_3": ${ defenses[2].details if other_defense else '' }
+    - "other_defense_details_4": ${ defenses[3].details if other_defense else '' }
+    - "other_defense_name_2": ${ defenses[1].name.text if other_defense else '' }
+    - "other_defense_name_3": ${ defenses[2].name.text if other_defense else '' }
+    - "other_defense_name_4": ${ defenses[3].name.text if other_defense else '' }
+---
+attachment:
+  variable name: additional_conditions[i]
+  name: additional_conditions
+  filename: additional_conditions
+  skip undefined: True
+  editable: False
+  pdf template file: additional_conditions.pdf
+  fields:
+    - "trial_court_county": ${ trial_court.address.county.upper() }
+    - "plaintiffs": ${ users.full_names() if user_ask_role == 'plaintiff' else other_parties.full_names() }
+    - "defendants": ${ other_parties.full_names() if user_ask_role == 'plaintiff' else users.full_names() }
+    - "case_number__1": ${ case_number }
+    - "unknown_occupants_cb": ${ unknown_occupants }
+    - "property_address": ${ rental_property.on_one_line(bare=True) }
+    
+    - "conditions_detail_4": ${ conditions[3].name.text  }
+    - "conditions_detail_5": ${ conditions[4].name.text  }
+    - "conditions_detail_6": ${ conditions[5].name.text  }
+    - "conditions_detail_7": ${ conditions[6].name.text  }
+    - "conditions_detail_8": ${ conditions[7].name.text  }
+    - "conditions_detail_9": ${ conditions[8].name.text  }
+    - "conditions_detail_10": ${ conditions[9].name.text }
+    - "conditions_detail_11": ${ conditions[10].name.text }
+    - "conditions_detail_12": ${ conditions[11].name.text }
+    - "conditions_detail_13": ${ conditions[12].name.text }
+    - "conditions_detail_14": ${ conditions[13].name.text }
+    - "conditions_detail_15": ${ conditions[14].name.text }
+    - "conditions_detail_16": ${ conditions[15].name.text }
+    - "conditions_start_4": ${ conditions[3].date_started }
+    - "conditions_start_5": ${ conditions[4].date_started }
+    - "conditions_start_6": ${ conditions[5].date_started }
+    - "conditions_start_7": ${ conditions[6].date_started }
+    - "conditions_start_8": ${ conditions[7].date_started }
+    - "conditions_start_9": ${ conditions[8].date_started }
+    - "conditions_start_10": ${ conditions[9].date_started }
+    - "conditions_start_11": ${ conditions[10].date_started }
+    - "conditions_start_12": ${ conditions[11].date_started }
+    - "conditions_start_13": ${ conditions[12].date_started }
+    - "conditions_start_14": ${ conditions[13].date_started }
+    - "conditions_start_15": ${ conditions[14].date_started }
+    - "conditions_start_16": ${ conditions[15].date_started }
+    - "conditions_fixed_4": ${ conditions[3].date_fixed }
+    - "conditions_fixed_5": ${ conditions[4].date_fixed }
+    - "conditions_fixed_6": ${ conditions[5].date_fixed }
+    - "conditions_fixed_7": ${ conditions[6].date_fixed }
+    - "conditions_fixed_8": ${ conditions[7].date_fixed }
+    - "conditions_fixed_9": ${ conditions[8].date_fixed }
+    - "conditions_fixed_10": ${ conditions[9].date_fixed }
+    - "conditions_fixed_11": ${ conditions[10].date_fixed }
+    - "conditions_fixed_12": ${ conditions[11].date_fixed }
+    - "conditions_fixed_13": ${ conditions[12].date_fixed }
+    - "conditions_fixed_14": ${ conditions[13].date_fixed }
+    - "conditions_fixed_15": ${ conditions[14].date_fixed }
+    - "conditions_fixed_16": ${ conditions[15].date_fixed }
+
+
 
 ---
-
 ############### Review page
 id: review screen
 event: review_answers
