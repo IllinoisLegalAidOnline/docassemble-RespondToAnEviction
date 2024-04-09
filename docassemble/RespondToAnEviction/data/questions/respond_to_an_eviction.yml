@@ -163,7 +163,7 @@ subquestion: |
   To use this program you will need: 
 
   * The Eviction Complaint that you received,
-  * ADD OTHER INFO, 
+  * Information that supports your defenses like rent payment records, termination notices, or documentation of bad property conditions, if any,
   * Names and addresses of the other parties, and
   * Names and addresses of the other parties' lawyers. 
 
@@ -244,7 +244,7 @@ subquestion: |
 
   ${ collapse_template(other_evictions_help) }
   
-  **Note:** A Notice of Termination from your landlord is not the same as being evicted in a lawsuit. If you received an Eviction Complaint and a Summons from the sheriff, you were likely sued.  
+  **Note:** Receiving a Notice of Termination from your landlord is not the same as being evicted in a lawsuit. If you received an Eviction Complaint and a Summons from the sheriff, you were likely sued in court.  
 
 fields:
   - no label: eviction_case
@@ -2292,6 +2292,10 @@ question: |
 subquestion: |
   Edit your answers below.
 review: 
+  - Edit: rental_property.address
+    button: |
+      **Rental property address:**
+      ${ rental_property.on_one_line(bare=True) }
   - Edit: users.revisit
     button: |
       **Your party: (Edit to change name, lawyer, address, and delivery info)**
@@ -2306,6 +2310,10 @@ review:
       % for my_var in other_parties:
         * ${ my_var.name.full(middle="full") }
       % endfor
+  - Edit: unknown_occupants
+    button: |
+      **Are "Unknown Occupants" listed as defendants on the *Eviction Complaint*?**
+      ${ word(yesno(unknown_occupants)) }      
   - Edit: 
       - trial_court_index
       - recompute:
@@ -2321,6 +2329,14 @@ review:
     button: |
       **Trial type:**
       ${ trial_with }
+  - Edit: optional_answer
+    button: |
+      **Do you want to file a written answer?**
+      ${ word(yesno(optional_answer)) }      
+  - Edit: general_denial
+    button: |
+      **Do you want to deny all claims in the *Eviction Complaint*?**
+      ${ word(yesno(general_denial)) }      
   - Edit: answer_responses.revisit
     button: |
       **Your responses: (Edit to change paragaph, subparagraph, and response)**
@@ -2328,10 +2344,182 @@ review:
       % for paragraph in answer_responses:
         * ${ paragraph.para + paragraph.sub + " (" + paragraph.response + ")"}
       % endfor
-  - Edit: e_signature
+    show if: general_denial == False
+  - Edit: notice_defense
     button: |
-      **Do you want to add your e-signature to your forms?**
-      ${ word(yesno(e_signature)) }
+      Problems with the notice:
+      
+      % if notice_defense["no_notice"] == True:
+      * The landlord did not give a written notice.
+      % endif
+      % if notice_defense["improper_service"] == True:
+      * The landlord did not give the notice in a lawful way.
+      % endif
+      % if notice_defense["improper_notice"] == True:
+      * Notice did not say the right number of days or the landlord did not wait the right number of days before filing the *Eviction Complaint*.
+      % endif
+      % if notice_defense["inadequate_notice"] == True:
+      * The notice is missing required information about how much rent was owed or how the lease was violated.
+      % endif
+      % if notice_defense.all_false():
+      * None selected
+      % endif
+  - Edit: cure_defense
+    button: |
+      **Did you fix the lease violation in time given by the lease or local law, also known as the "cure" defense?**
+      ${ word(yesno(cure_defense)) }      
+  - Edit: cure_defense_details
+    button: |
+      **Cure defense details:**
+      ${ cure_defense_details }
+    show if: cure_defense
+  - Edit: conditions_defense
+    button: |
+      **Were there bad property conditions?**
+      ${ word(yesno(conditions_defense)) }
+  - Edit: conditions.revisit
+    button: |
+      **Property conditions: (Edit to change details)**
+
+      % for my_var in conditions:
+        * ${ my_var.name.text }
+      % endfor
+    show if: conditions_defense
+  - Edit: retaliation_state
+    button: |
+      **Did the landlord file the eviction in retaliation?**
+
+      % if retaliation_state:
+      * Yes, in violation of state law.
+      % endif      
+      % if retaliation_local:
+      * Yes, in violation of a local ordinance.
+      % endif
+      % if retaliation_state == False and retaliation_local == False:
+      * No
+      % endif
+  - Edit: retaliation_ordinance
+    button: |
+      **Municipality or county ordinance where property located:**
+      ${ retaliation_ordinance }
+    show if: retaliation_local
+  - Edit: retaliation_complain_to
+    button: |
+      **Who did you complain to?**
+      
+      % if retaliation_complain_to['landlord']:
+      * My landlord
+      % endif      
+      % if retaliation_complain_to['legal_org']:
+      * A legal organization
+      % endif
+      % if retaliation_complain_to['community_group']:
+      * A community group
+      % endif
+      % if retaliation_complain_to['government']:
+      * Someone in government
+      % endif
+      % if retaliation_complain_to['media']:
+      * The media
+      % endif
+      % if retaliation_complain_to['tenants_org']:
+      * A tenants organization
+      % endif
+      % if retaliation_complain_to['other']:
+      * Another person or entity
+      % endif
+    show if: retaliation_local
+  - Edit: retaliation_complain_to_other
+    button: |
+      **Other person or entity you complained to:**
+      ${ retaliation_complain_to_other }
+    show if: retaliation_local and retaliation_complain_to['other']
+  - Edit: retaliation_activity
+    button: |
+      **Is your landlord retaliating against you because you did something else?**
+      ${ word(yesno(retaliation_activity)) }      
+    show if: retaliation_local
+  - Edit: retaliation_activity_name
+    button: |
+      **Other protected activity:**
+      ${ retaliation_activity_name }      
+    show if: retaliation_local and retaliation_activity
+  - Edit: retaliation_details
+    button: |
+      **Retaliation details:**
+      ${ retaliation_details}
+    show if: retaliation_state or retaliation_local
+  - Edit: waiver_defense
+    button: |
+      **Did the landlord act like the lease continued after learning of a lease violation, also known as a "waiver" defense?**
+      ${ word(yesno(waiver_defense)) }      
+  - Edit: new_lease_signed_date
+    button: |
+      **Date landlord signed a new lease with you:**
+      ${ new_lease_signed_date }
+    show if: waiver_defense
+  - Edit: rent_accepted_date
+    button: |
+      **Date landlord accepted your rent:**
+      ${ rent_accepted_date }
+    show if: waiver_defense
+  - Edit: waiver_defense_details
+    button: |
+      **Waiver defense details:**
+      ${ waiver_defense_details }
+    show if: waiver_defense
+  - Edit: rent_refusal_defense
+    button: |
+      **Did the landlord refuse your rent payment?**
+      ${ word(yesno(rent_refusal_defense)) }      
+  - Edit: rent_payment_date
+    button: |
+      **Date you tried to pay rent to the landlord:**
+      ${ rent_payment_date }
+    show if: rent_refusal_defense
+  - Edit: refused_rent_amount
+    button: |
+      **Rent payment amount:**
+      $ ${ thousands(refused_rent_amount, show_decimals=True) }
+    show if: rent_refusal_defense
+  - Edit: rent_refusal_defense_details
+    button: |
+      **Additional rent refusal details:**
+      ${ rent_refusal_defense_details }
+    show if: rent_refusal_defense
+  - Edit: other_defense
+    button: |
+      **Do you have any other affirmative defenses?**
+      ${ word(yesno(other_defense)) }
+  - Edit: defenses.revisit
+    button: |
+      **Other affirmative defenses: (Edit to change details)**
+
+      % for my_var in defenses:
+        * ${ my_var.name.text }
+      % endfor
+    show if: other_defense
+  - Edit: additional_defense_information
+    button: |
+      **Additional information you want the judge to consider:**
+      % if additional_defense_information == "":
+      None
+      % else:
+      ${ additional_defense_information }
+      % endif
+  - Edit: has_counterclaims
+    button: |
+      **Do you have any counterclaims?**
+      ${ word(yesno(has_counterclaims)) }
+  - Edit: claims.revisit
+    button: |
+      **Counterclaims: (Edit to change details)**
+
+      % for my_var in claims:
+        * ${ my_var.name.text }
+      % endfor
+    show if: has_counterclaims
+    
   - Edit: users[0].address.address
     button: |
       **Your address:**
@@ -2349,6 +2537,10 @@ review:
       **Your email:**
       ${ users[0].email }
     show if: users[0].email_notice
+  - Edit: e_signature
+    button: |
+      **Do you want to add your e-signature to your forms?**
+      ${ word(yesno(e_signature)) }
 ---
 #needs: yes_no_unknown
 id: delivery party review
@@ -2510,6 +2702,10 @@ question: |
 subquestion: |
   Edit your answers below.
 review: 
+  - Edit: rental_property.address
+    button: |
+      **Rental property address:**
+      ${ rental_property.on_one_line(bare=True) }
   - Edit: users.revisit
     button: |
       **Your party: (Edit to change name, lawyer, address, and delivery info)**
@@ -2524,6 +2720,10 @@ review:
       % for my_var in other_parties:
         * ${ my_var.name.full(middle="full") }
       % endfor
+  - Edit: unknown_occupants
+    button: |
+      **Are "Unknown Occupants" listed as defendants on the *Eviction Complaint*?**
+      ${ word(yesno(unknown_occupants)) }      
   - Edit: 
       - trial_court_index
       - recompute:
@@ -2547,6 +2747,14 @@ question: |
 subquestion: |
   Edit your answers below.
 review:
+  - Edit: optional_answer
+    button: |
+      **Do you want to file a written answer?**
+      ${ word(yesno(optional_answer)) }      
+  - Edit: general_denial
+    button: |
+      **Do you want to deny all claims in the *Eviction Complaint*?**
+      ${ word(yesno(general_denial)) }      
   - Edit: answer_responses.revisit
     button: |
       **Your responses: (Edit to change paragaph, subparagraph, and response)**
@@ -2554,6 +2762,318 @@ review:
       % for paragraph in answer_responses:
         * ${ paragraph.para + paragraph.sub + " (" + paragraph.response + ")"}
       % endfor
+    show if: general_denial == False
+---
+id: affirmative defenses section review screen
+event: section_defenses
+question: |
+  Affirmative defenses
+subquestion: |
+  Edit your answers below.
+review:
+  - Edit: notice_defense
+    button: |
+      Problems with the notice:
+      
+      % if notice_defense["no_notice"] == True:
+      * The landlord did not give a written notice.
+      % endif
+      % if notice_defense["improper_service"] == True:
+      * The landlord did not give the notice in a lawful way.
+      % endif
+      % if notice_defense["improper_notice"] == True:
+      * Notice did not say the right number of days or the landlord did not wait the right number of days before filing the *Eviction Complaint*.
+      % endif
+      % if notice_defense["inadequate_notice"] == True:
+      * The notice is missing required information about how much rent was owed or how the lease was violated.
+      % endif
+      % if notice_defense.all_false():
+      * None selected
+      % endif
+  - Edit: cure_defense
+    button: |
+      **Did you fix the lease violation in time given by the lease or local law, also known as the "cure" defense?**
+      ${ word(yesno(cure_defense)) }      
+  - Edit: cure_defense_details
+    button: |
+      **Cure defense details:**
+      ${ cure_defense_details }
+    show if: cure_defense
+  - Edit: conditions_defense
+    button: |
+      **Were there bad property conditions?**
+      ${ word(yesno(conditions_defense)) }
+  - Edit: conditions.revisit
+    button: |
+      **Property conditions: (Edit to change details)**
+
+      % for my_var in conditions:
+        * ${ my_var.name.text }
+      % endfor
+    show if: conditions_defense
+  - Edit: retaliation_state
+    button: |
+      **Did the landlord file the eviction in retaliation?**
+
+      % if retaliation_state:
+      * Yes, in violation of state law.
+      % endif      
+      % if retaliation_local:
+      * Yes, in violation of a local ordinance.
+      % endif
+      % if retaliation_state == False and retaliation_local == False:
+      * No
+      % endif
+  - Edit: retaliation_ordinance
+    button: |
+      **Municipality or county ordinance where property located:**
+      ${ retaliation_ordinance }
+    show if: retaliation_local
+  - Edit: retaliation_complain_to
+    button: |
+      **Who did you complain to?**
+      
+      % if retaliation_complain_to['landlord']:
+      * My landlord
+      % endif      
+      % if retaliation_complain_to['legal_org']:
+      * A legal organization
+      % endif
+      % if retaliation_complain_to['community_group']:
+      * A community group
+      % endif
+      % if retaliation_complain_to['government']:
+      * Someone in government
+      % endif
+      % if retaliation_complain_to['media']:
+      * The media
+      % endif
+      % if retaliation_complain_to['tenants_org']:
+      * A tenants organization
+      % endif
+      % if retaliation_complain_to['other']:
+      * Another person or entity
+      % endif
+    show if: retaliation_local
+  - Edit: retaliation_complain_to_other
+    button: |
+      **Other person or entity you complained to:**
+      ${ retaliation_complain_to_other }
+    show if: retaliation_local and retaliation_complain_to['other']
+  - Edit: retaliation_activity
+    button: |
+      **Is your landlord retaliating against you because you did something else?**
+      ${ word(yesno(retaliation_activity)) }      
+    show if: retaliation_local
+  - Edit: retaliation_activity_name
+    button: |
+      **Other protected activity:**
+      ${ retaliation_activity_name }      
+    show if: retaliation_local and retaliation_activity
+  - Edit: retaliation_details
+    button: |
+      **Retaliation details:**
+      ${ retaliation_details}
+    show if: retaliation_state or retaliation_local
+  - Edit: waiver_defense
+    button: |
+      **Did the landlord act like the lease continued after learning of a lease violation, also known as a "waiver" defense?**
+      ${ word(yesno(waiver_defense)) }      
+  - Edit: new_lease_signed_date
+    button: |
+      **Date landlord signed a new lease with you:**
+      ${ new_lease_signed_date }
+    show if: waiver_defense
+  - Edit: rent_accepted_date
+    button: |
+      **Date landlord accepted your rent:**
+      ${ rent_accepted_date }
+    show if: waiver_defense
+  - Edit: waiver_defense_details
+    button: |
+      **Waiver defense details:**
+      ${ waiver_defense_details }
+    show if: waiver_defense
+  - Edit: rent_refusal_defense
+    button: |
+      **Did the landlord refuse your rent payment?**
+      ${ word(yesno(rent_refusal_defense)) }      
+  - Edit: rent_payment_date
+    button: |
+      **Date you tried to pay rent to the landlord:**
+      ${ rent_payment_date }
+    show if: rent_refusal_defense
+  - Edit: refused_rent_amount
+    button: |
+      **Rent payment amount:**
+      $ ${ thousands(refused_rent_amount, show_decimals=True) }
+    show if: rent_refusal_defense
+  - Edit: rent_refusal_defense_details
+    button: |
+      **Additional rent refusal details:**
+      ${ rent_refusal_defense_details }
+    show if: rent_refusal_defense
+  - Edit: other_defense
+    button: |
+      **Do you have any other affirmative defenses?**
+      ${ word(yesno(other_defense)) }
+  - Edit: defenses.revisit
+    button: |
+      **Other affirmative defenses: (Edit to change details)**
+
+      % for my_var in defenses:
+        * ${ my_var.name.text }
+      % endfor
+    show if: other_defense
+  - Edit: additional_defense_information
+    button: |
+      **Additional information you want the judge to consider:**
+      % if additional_defense_information == "":
+      None
+      % else:
+      ${ additional_defense_information }
+      % endif
+
+---
+id: conditions revisit
+continue button field: conditions.revisit
+question: |
+  Edit the bad property conditions
+subquestion: |
+  ${ conditions.table }
+
+  % if conditions.number_gathered() < 16:
+  ${ conditions.add_action() }
+  % endif
+---
+table: conditions.table
+rows: conditions
+columns:
+  - Problem with the property: |
+      row_item.name.text if defined("row_item.name.text") else ""
+  - Dates (when problem started and when landlord fixed, if any): |
+      action_button_html(url_action(row_item.attr_name("review_conditions_details")), label="Edit", icon="pencil-alt")
+delete buttons: True
+confirm: True
+---
+id: conditions edit
+continue button field: x.review_conditions_details
+generic object: DAObject
+question: |
+  Edit conditions
+review: 
+  - Edit: x.name.text
+    button: |
+      **Problem:**
+      ${ x.name.text  }
+  - Edit: x.date_started
+    button: |
+      **Date problem started:**
+      ${ x.date_started } 
+  - Edit: x.date_fixed
+    button: |
+      **Date fixed, if any:**
+      ${ x.date_fixed }
+continue button label: Next
+
+---
+id: defenses revisit
+continue button field: defenses.revisit
+question: |
+  Edit the affirmative defenses
+subquestion: |
+  ${ defenses.table }
+
+  % if defenses.number_gathered() < 4:
+  ${ defenses.add_action() }
+  % endif
+---
+table: defenses.table
+rows: defenses
+columns:
+  - Affirmative defense: |
+      row_item.name.text if defined("row_item.name.text") else ""
+  - Facts that support your defense: |
+      action_button_html(url_action(row_item.attr_name("review_defenses_details")), label="Edit", icon="pencil-alt")
+delete buttons: True
+confirm: True
+---
+id: defenses edit
+continue button field: x.review_defenses_details
+generic object: DAObject
+question: |
+  Edit affirmative defenses
+review: 
+  - Edit: x.name.text
+    button: |
+      **Short name or description of defense:**
+      ${ x.name.text  }
+  - Edit: x.date_started
+    button: |
+      **Facts that support your defense:**
+      ${ x.details } 
+continue button label: Next
+
+
+---
+id: counterclaims section review screen
+event: section_counterclaims
+question: |
+  Counterclaims
+subquestion: |
+  Edit your answers below.
+review:
+  - Edit: has_counterclaims
+    button: |
+      **Do you have any counterclaims?**
+      ${ word(yesno(has_counterclaims)) }
+  - Edit: claims.revisit
+    button: |
+      **Counterclaims: (Edit to change details)**
+
+      % for my_var in claims:
+        * ${ my_var.name.text }
+      % endfor
+    show if: has_counterclaims
+
+---
+id: counterclaims revisit
+continue button field: claims.revisit
+question: |
+  Edit the counterclaims
+subquestion: |
+  ${ claims.table }
+
+  % if claims.number_gathered() < 5:
+  ${ claims.add_action() }
+  % endif
+---
+table: claims.table
+rows: claims
+columns:
+  - Your claim and supporting facts: |
+      row_item.name.text if defined("row_item.name.text") else ""
+  - What landlord should pay and other relief: |
+      action_button_html(url_action(row_item.attr_name("review_counterclaims_details")), label="Edit", icon="pencil-alt")
+delete buttons: True
+confirm: True
+---
+id: counterclaims edit
+continue button field: x.review_counterclaims_details
+generic object: DAObject
+question: |
+  Edit counterclaims
+review: 
+  - Edit: x.name.text
+    button: |
+      **Your claim and supporting facts:**
+      ${ x.name.text  }
+  - Edit: x.date_started
+    button: |
+      **What the landlord should pay you and other relief:**
+      ${ x.details } 
+continue button label: Next
+
 ---
 id: delivery info review screen
 event: section_delivery
