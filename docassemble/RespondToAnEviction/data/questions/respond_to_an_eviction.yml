@@ -45,7 +45,6 @@ sections:
   - section_delivery: Delivery details
   - section_about_you: About you
   - section_download: Download  
-
 ---
 # interview order block
 mandatory: True
@@ -110,7 +109,9 @@ code: |
   counterclaims_intro
   if has_counterclaims:
     claims.gather()
-
+  if notice_defense.all_false() and not cure_defense and not conditions_defense and not retaliation_state and not retaliation_local and not waiver_defense and not rent_refusal_defense and not other_defense and additional_defense_information == "" and not has_counterclaims:
+    appearance_only
+    
   set_progress(75)
   nav.set_section('section_delivery')
   delivery_intro
@@ -204,7 +205,7 @@ subquestion: |
   This program can help you make several forms that may be useful in your eviction case. Here are some definitions.
 
   * **Appearance**: Tells the judge and the Plaintiff (for example, the landlord or owner) that you are participating in the case. It also says whether you want a trial by judge only or by judge and jury.
-  * **Answer**: Your response to each paragraph in the Eviction Complaint.
+  * **Answer**: Your response to each paragraph in the Eviction Complaint, either all together or one-by-one.
   * **Affirmative Defenses**: Your reasons why the Plaintiff should not win the case even if everything in the complaint is true.
   * **Counterclaims**: Your separate legal claim(s) against the Plaintiff, specifically stating what relief you want from the court. Counterclaims must be directly related to the eviction, or the judge may dismiss them.
 
@@ -520,7 +521,7 @@ fields:
 ---
 id: e-signature
 question: |
-  Do you want to add your e-signature to your ${ form_name }?
+  Do you want to add your e-signature to your *Appearance* and *Eviction Answer*?
 subquestion: |
   If you do not add your **{e-signature}**, you must sign your paper forms before you file and deliver them.
 
@@ -534,14 +535,24 @@ terms:
 ---
 template: signature_help
 subject: |
-  **What does it mean to sign the *Appearance* and *Answer*?**
+  **What does it mean to sign the *Appearance* and *Eviction Answer*?**
 content: |  
-  By signing your *Appearance* and *Answer*, you are certifying that:
+  By signing your *Eviction Answer*, you are certifying that:
   
   * Everything on the forms is true and correct, and
   * You understand that making a false statement on the form is perjury, which can result in criminal penalties.
 
   See the [**Code of Civil Procedure, 735 ILCS 5/1-109**](https://www.ilga.gov/legislation/ilcs/documents/073500050k1-109.htm), for more information.
+  
+  By signing your *Appearance*, you are certifying that:
+  
+  * You read the form,
+  * You believe it to be true and correct, and
+  * You are not filing it for an improper purpose, such as to cause delay.
+
+  See **[Illinois Supreme Court Rule 137](https://ilcourtsaudio.blob.core.windows.net/antilles-resources/resources/9ce1fce9-895f-463e-b87d-f9b7631f8fde/Rule%20137.pdf)** for more information.  
+  
+  
 ---
 id: optional answer
 question: |
@@ -676,24 +687,6 @@ subquestion: |
   
   This program will explain the most common affirmative defenses. To learn more, read ILAO's article about [**common eviction defenses**](https://www.illinoislegalaid.org/node/31006).
 ---
-# will remove this question - note from 3/28/24
-#id: optional affirmative defenses
-#question: |
-#  What are your Affirmative Defenses?
-#subquestion: |
-#  You can add details on the next screens.
-#fields:
-#  - I have these defenses: defenses
-#    datatype: checkboxes
-#    choices:
-#      - I received no written notice of eviction or an improper written notice of eviction.: notice
-#      - I fixed the lease violation to stop the eviction.: cure
-#      - Bad property conditions made the rental unit worth less than the rent I owe.: conditions
-#      - The landlord is retaliating against me for something I did.: retaliation
-#      - After the landlord started to evict me for violating the lease, they signed a new lease or accepted my rent payment.: waiver
-#      - I tried to pay my rent, but the landlord refuse to accept it.: refusal
-#      - I have other affirmative defenses not listed here.: other
----
 id: notice defense
 question: |
   Notice defense
@@ -732,7 +725,7 @@ fields:
     datatype: yesnoradio
   - Additional details about how you fixed the lease violation: cure_defense_details
     input type: area
-    rows: 3
+    rows: 5
     maxlength: 250
     required: False
     show if:
@@ -756,6 +749,11 @@ question: |
   Bad property conditions details
 subquestion: |
   Enter details about your property conditions.
+
+  The forms have space for up to 16 different property conditions. List each one separately like "bedbugs" or "the front door to my unit does not lock." There isn't much room on the forms for details.
+  
+  You will need to show proof of the bad property conditions to the judge.
+
 fields:
   - Serious problems that the landlord knew about: conditions[i].name.text
     input type: area
@@ -845,15 +843,20 @@ fields:
       is: True
   - Other person or entity you complained to: retaliation_complain_to_other
     maxlength: 40
-    js show if: 
-      val("retaliation_local") == true && val("retaliation_complain_to") == "other"
+    show if:
+      variable: retaliation_complain_to["other"]
+      is: True
+    #js show if: 
+    #  val("retaliation_local") == true && val("retaliation_complain_to") == "other"
   - Is your landlord retaliating against you because you did something else?: retaliation_activity
     datatype: yesnoradio
     show if:
       variable: retaliation_local
       is: True
   - Name the activity (you can give details on the next screen): retaliation_activity_name
-    maxlength: 30
+    input type: area
+    rows: 2
+    maxlength: 70
     js show if: 
       val("retaliation_local") == true && val("retaliation_activity") == true
 ---
@@ -871,7 +874,7 @@ subquestion: |
 fields:
   - no label: retaliation_details
     datatype: area
-    rows: 3
+    rows: 5
     maxlength: 350
 ---
 id: waiver defense
@@ -992,11 +995,11 @@ question: |
 subquestion: |
   Enter details about your affirmative defense.
 fields:
-  - Short name or description of the affirmtaive defenset: defenses[i].name.text
+  - Short name or description of the affirmtaive defense: defenses[i].name.text
     maxlength: 60
   - Facts that support your defense:: defenses[i].details
     input type: area
-    rows: 9
+    rows: 10
     maxlength: 500
 ---
 id: any other defenses
@@ -1033,10 +1036,9 @@ subquestion: |
 fields:
   - no label: additional_defense_information
     input type: area
-    rows: 10
+    rows: 8
     maxlength: 600
     required: False
-
 
 ---
 id: counterclaims intro
@@ -1066,15 +1068,17 @@ question: |
   Counterclaim details
 subquestion: |
   Enter details about your counterclaim.
+  
+  The forms have space for up to 5 separate counterclaims.
 fields:
   - State what you are claiming and the facts that support your claims:: claims[i].name.text
     input type: area
-    rows: 7
+    rows: 10
     maxlength: 500
   - List what the landlord should pay you and other relief:: claims[i].details
     input type: area
-    rows: 5
-    maxlength: 300
+    rows: 6
+    maxlength: 275
 ---
 id: any other counterclaims
 question: |
@@ -1098,8 +1102,14 @@ code: |
   if claims.number_gathered() >= 5:
     claims.there_is_another = False
 ---
-
-
+id: appearance only warning
+continue button field: appearance_only
+question: |
+  *Appearance* only
+subquestion: |
+  Since you did not want to file a written Answer, bring up an affirmative defense, or file any counterclaims, this program will only make an *Appearance* form.
+  
+  The *Appearance* tells the court and other parties that you are participating in the court case. It also tells the court if you want a jury along with the judge at trial.
   
 ---
 reconsider: True
@@ -1107,27 +1117,27 @@ code: |
   delivery_parties = DAList("delivery_parties", elements = other_parties + users[1:])
 # changed order to keep it a DAList
 ---
-id: extra delivery forms required
-continue button field: extra_delivery_forms
-question: |
-  Additional Proof of Delivery
-subquestion: |
-  This program makes the Proof of Delivery forms for up to 8 other parties.
-  
-  You will need to fill out *Additional Proof of Delivery* forms for ${comma_and_list(delivery_parties[8:])}. 
-  
-  You can download blank *Additional Proof of Delivery* forms at the end of this program.
+#id: extra delivery forms required
+#continue button field: extra_delivery_forms
+#question: |
+#  Additional Proof of Delivery
+#subquestion: |
+#  This program makes the Proof of Delivery forms for up to 8 other parties.
+#  
+#  You will need to fill out *Additional Proof of Delivery* forms for ${comma_and_list(delivery_parties[8:])}. 
+#  
+#  You can download blank *Additional Proof of Delivery* forms at the end of this program.
 ---
 id: delivery intro
 continue button field: delivery_intro
 question: |
-  Send your ${ form_name } to all other parties
+  Send your forms to all other parties
 subquestion: |
   These are the other parties in this case: ${comma_and_list(delivery_parties)}.
 
-  You must send a copy of your ${ form_name } to each of them.
+  You must send a copy of your forms to each of them.
 
-  If someone in the case has a lawyer, you must send it to the lawyer.
+  If someone in the case has a lawyer, you only need to send their copy of the forms to their lawyer.
 ---
 id: has lawyer
 generic object: ALIndividual
@@ -1372,7 +1382,7 @@ subquestion: |
   
   Your forms are ready. View and download your forms below. Click **Make changes** to fix any mistakes.
 
-  This program **does not** file your Appearance and Answer with the court or deliver them to other parties in your case. You will need to do this yourself. Learn about [**e-filing in Illinois**](https://www.illinoiscourts.gov/eservices/efileil/).
+  This program **does not** file your forms with the court or deliver them to other parties in your case. You will need to do this yourself. Learn about [**e-filing in Illinois**](https://www.illinoiscourts.gov/eservices/information-for-filers-without-lawyers).
 
   ${ action_button_html(url_action('review_answers'), label=':edit: Make changes', color='success', size="md") }
   
@@ -1382,7 +1392,7 @@ subquestion: |
 
   ${ al_user_bundle.send_button_html(show_editable_checkbox=False) }
 
-  **Note:** This program **does not** file your Appearance or Answer with the court or deliver them to other parties in your case. Learn about [**e-filing in Illinois**](https://www.illinoiscourts.gov/eservices/efileil/).
+  **Note:** This program **does not** file your forms with the court or deliver them to other parties in your case. Learn about [**e-filing in Illinois**](https://www.illinoiscourts.gov/eservices/information-for-filers-without-lawyers).
   
   Thank you for using ILAO Easy Forms!
 under: |
@@ -1434,7 +1444,7 @@ objects:
 ---
 reconsider: True
 code: |
-  #deliveries_to_bundle will be used as the elements for the additional_delivery_bundle object created in the above block. This is its initial definition
+  #deliveries_to_bundle will be used as the elements for the additional_delivery_bundle object created in the above block. This is its initial definition for the Appearance.
   deliveries_to_bundle = []
 
   #enumerate allows us to reference the index in a for loop. This for loop appends each additional proof template to the deliveries_to_bundle object and sets the enabled trait for those templates.
@@ -1459,24 +1469,26 @@ code: |
   refresh_delivery_bundle = True
 ---
 # eviction answer delivery bundle starts at index 1 instead of index 2
+# only check to see if additional proof of delivery should be enabled if making eviction_answer
 reconsider: True
 code: |
-  answer_deliveries_to_bundle = []
+  #if notice_defense.any_true() or cure_defense or conditions_defense or retaliation_state or retaliation_local or waiver_defense or rent_refusal_defense or other_defense or additional_defense_information != "" or has_counterclaims:
+  if eviction_answer.enabled:
+    answer_deliveries_to_bundle = []
+    for index, party in enumerate(delivery_parties):
+      if index == 0:
+        party.answer_additional_proof.enabled = False
+      elif ((index % 2) == 1) or index == 1:
+        party.answer_additional_proof.enabled = True
+        answer_deliveries_to_bundle.append(party.answer_additional_proof)
+        if (index + 1) < delivery_parties.number_gathered():
+          party.second_person = delivery_parties[index + 1]
+      else:
+        party.answer_additional_proof.enabled = False
+    answer_additional_delivery_bundle.elements = answer_deliveries_to_bundle
+  else:
+    answer_additional_delivery_bundle.elements = []
 
-  for index, party in enumerate(delivery_parties):
-
-    if index == 0:
-      party.answer_additional_proof.enabled = False
-
-    elif ((index % 2) == 1) or index == 1:
-      party.answer_additional_proof.enabled = True
-      answer_deliveries_to_bundle.append(party.answer_additional_proof)
-      if (index + 1) < delivery_parties.number_gathered():
-        party.second_person = delivery_parties[index + 1]
-    else:
-      party.answer_additional_proof.enabled = False
- 
-  answer_additional_delivery_bundle.elements = answer_deliveries_to_bundle
   refresh_answer_delivery_bundle = True
 
 ---
@@ -1514,19 +1526,19 @@ code: |
   #  appearance_additional_blank.enabled = True
 
   if notice_defense.any_true() or cure_defense or conditions_defense or retaliation_state or retaliation_local or waiver_defense or rent_refusal_defense or other_defense or additional_defense_information != "" or has_counterclaims:
-    eviction_answer.enabled = True 
+    eviction_answer.enabled = True
     if optional_answer:
       if general_denial == False:
         if answer_responses.number() > 10:
           additional_answer.enabled = True
 
-    if has_counterclaims:
-      if claims.number() > 1 or defenses.number() > 1:
-        additional_defenses_counterclaims.enabled = True
-
     if conditions_defense:
       if conditions.number() > 3:
         additional_conditions.enabled = True
+
+    if has_counterclaims:
+      if claims.number() > 1 or defenses.number() > 1:
+        additional_defenses_counterclaims.enabled = True
 
 ---
 objects:
@@ -2015,10 +2027,10 @@ attachment:
     - "conditions_detail_3": ${ conditions[2].name.text if conditions_defense else '' }
     - "conditions_start_1": ${ format_date(conditions[0].date_started, format='MMM d, yyyy') if conditions_defense else '' }
     - "conditions_start_2": ${ format_date(conditions[1].date_started, format='MMM d, yyyy') if conditions_defense else '' }
-    - "conditions_start_3": ${ format_date(conditions[1].date_started, format='MMM d, yyyy') if conditions_defense else '' }
-    - "conconditions_fixed_1": ${ format_date(conditions[0].date_fixed, format='MMM d, yyyy') if conditions_defense else '' }
-    - "conconditions_fixed_2": ${ format_date(conditions[1].date_fixed, format='MMM d, yyyy') if conditions_defense else '' }
-    - "conconditions_fixed_3": ${ format_date(conditions[1].date_fixed, format='MMM d, yyyy') if conditions_defense else '' }
+    - "conditions_start_3": ${ format_date(conditions[2].date_started, format='MMM d, yyyy') if conditions_defense else '' }
+    - "conconditions_fixed_1": ${ format_date(conditions[0].date_fixed, format='MMM d, yyyy') if conditions_defense and conditions[0].date_fixed !='' else '' }
+    - "conconditions_fixed_2": ${ format_date(conditions[1].date_fixed, format='MMM d, yyyy') if conditions_defense and conditions[1].date_fixed !='' else '' }
+    - "conconditions_fixed_3": ${ format_date(conditions[2].date_fixed, format='MMM d, yyyy') if conditions_defense and conditions[2].date_fixed !='' else '' }
     - "additional_conditions": ${ conditions.number() > 3 }
 
     - "retaliation_cb": ${ retaliation_state or retaliation_local }
@@ -2267,19 +2279,19 @@ attachment:
     - "conditions_start_14": ${ format_date(conditions[13].date_started, format='MMM d, yyyy') }
     - "conditions_start_15": ${ format_date(conditions[14].date_started, format='MMM d, yyyy') }
     - "conditions_start_16": ${ format_date(conditions[15].date_started, format='MMM d, yyyy') }
-    - "conditions_fixed_4": ${ format_date(conditions[3].date_fixed, format='MMM d, yyyy') }
-    - "conditions_fixed_5": ${ format_date(conditions[4].date_fixed, format='MMM d, yyyy') }
-    - "conditions_fixed_6": ${ format_date(conditions[5].date_fixed, format='MMM d, yyyy') }
-    - "conditions_fixed_7": ${ format_date(conditions[6].date_fixed, format='MMM d, yyyy') }
-    - "conditions_fixed_8": ${ format_date(conditions[7].date_fixed, format='MMM d, yyyy') }
-    - "conditions_fixed_9": ${ format_date(conditions[8].date_fixed, format='MMM d, yyyy') }
-    - "conditions_fixed_10": ${ format_date(conditions[9].date_fixed, format='MMM d, yyyy') }
-    - "conditions_fixed_11": ${ format_date(conditions[10].date_fixed, format='MMM d, yyyy') }
-    - "conditions_fixed_12": ${ format_date(conditions[11].date_fixed, format='MMM d, yyyy') }
-    - "conditions_fixed_13": ${ format_date(conditions[12].date_fixed, format='MMM d, yyyy') }
-    - "conditions_fixed_14": ${ format_date(conditions[13].date_fixed, format='MMM d, yyyy') }
-    - "conditions_fixed_15": ${ format_date(conditions[14].date_fixed, format='MMM d, yyyy') }
-    - "conditions_fixed_16": ${ format_date(conditions[15].date_fixed, format='MMM d, yyyy') }
+    - "conditions_fixed_4": ${ format_date(conditions[3].date_fixed, format='MMM d, yyyy') if conditions[3].date_fixed !='' else '' }
+    - "conditions_fixed_5": ${ format_date(conditions[4].date_fixed, format='MMM d, yyyy') if conditions[4].date_fixed !='' else '' }
+    - "conditions_fixed_6": ${ format_date(conditions[5].date_fixed, format='MMM d, yyyy') if conditions[5].date_fixed !='' else '' }
+    - "conditions_fixed_7": ${ format_date(conditions[6].date_fixed, format='MMM d, yyyy') if conditions[6].date_fixed !='' else '' }
+    - "conditions_fixed_8": ${ format_date(conditions[7].date_fixed, format='MMM d, yyyy') if conditions[7].date_fixed !='' else '' }
+    - "conditions_fixed_9": ${ format_date(conditions[8].date_fixed, format='MMM d, yyyy') if conditions[8].date_fixed !='' else '' }
+    - "conditions_fixed_10": ${ format_date(conditions[9].date_fixed, format='MMM d, yyyy') if conditions[9].date_fixed !='' else '' }
+    - "conditions_fixed_11": ${ format_date(conditions[10].date_fixed, format='MMM d, yyyy') if conditions[10].date_fixed !='' else '' }
+    - "conditions_fixed_12": ${ format_date(conditions[11].date_fixed, format='MMM d, yyyy') if conditions[11].date_fixed !='' else '' }
+    - "conditions_fixed_13": ${ format_date(conditions[12].date_fixed, format='MMM d, yyyy') if conditions[12].date_fixed !='' else '' }
+    - "conditions_fixed_14": ${ format_date(conditions[13].date_fixed, format='MMM d, yyyy') if conditions[13].date_fixed !='' else '' }
+    - "conditions_fixed_15": ${ format_date(conditions[14].date_fixed, format='MMM d, yyyy') if conditions[14].date_fixed !='' else '' }
+    - "conditions_fixed_16": ${ format_date(conditions[15].date_fixed, format='MMM d, yyyy') if conditions[15].date_fixed !='' else '' }
 
 
 
@@ -2347,7 +2359,7 @@ review:
     show if: general_denial == False
   - Edit: notice_defense
     button: |
-      Problems with the notice:
+      **Problems with the notice:**
       
       % if notice_defense["no_notice"] == True:
       * The landlord did not give a written notice.
@@ -2388,15 +2400,17 @@ review:
   - Edit: retaliation_state
     button: |
       **Did the landlord file the eviction in retaliation?**
-
+      % if retaliation_state == False and retaliation_local == False:
+      No
+      % endif
+      % if retaliation_state or retaliation_local:
+      
       % if retaliation_state:
       * Yes, in violation of state law.
       % endif      
       % if retaliation_local:
       * Yes, in violation of a local ordinance.
       % endif
-      % if retaliation_state == False and retaliation_local == False:
-      * No
       % endif
   - Edit: retaliation_ordinance
     button: |
@@ -2773,7 +2787,7 @@ subquestion: |
 review:
   - Edit: notice_defense
     button: |
-      Problems with the notice:
+      **Problems with the notice:**
       
       % if notice_defense["no_notice"] == True:
       * The landlord did not give a written notice.
@@ -2814,15 +2828,17 @@ review:
   - Edit: retaliation_state
     button: |
       **Did the landlord file the eviction in retaliation?**
-
+      % if retaliation_state == False and retaliation_local == False:
+      No
+      % endif
+      % if retaliation_state or retaliation_local:
+      
       % if retaliation_state:
       * Yes, in violation of state law.
       % endif      
       % if retaliation_local:
       * Yes, in violation of a local ordinance.
       % endif
-      % if retaliation_state == False and retaliation_local == False:
-      * No
       % endif
   - Edit: retaliation_ordinance
     button: |
@@ -2952,30 +2968,29 @@ columns:
   - Problem with the property: |
       row_item.name.text if defined("row_item.name.text") else ""
   - Dates (when problem started and when landlord fixed, if any): |
-      action_button_html(url_action(row_item.attr_name("review_conditions_details")), label="Edit", icon="pencil-alt")
+      action_button_html(url_action(row_item.attr_name("name.text")), label="Edit", icon="pencil-alt")
 delete buttons: True
 confirm: True
 ---
-id: conditions edit
-continue button field: x.review_conditions_details
-generic object: DAObject
-question: |
-  Edit conditions
-review: 
-  - Edit: x.name.text
-    button: |
-      **Problem:**
-      ${ x.name.text  }
-  - Edit: x.date_started
-    button: |
-      **Date problem started:**
-      ${ x.date_started } 
-  - Edit: x.date_fixed
-    button: |
-      **Date fixed, if any:**
-      ${ x.date_fixed }
-continue button label: Next
-
+#id: conditions edit
+#ontinue button field: x.review_conditions_details
+#eneric object: DAObject
+#uestion: |
+# Edit conditions
+#eview: 
+# - Edit: x.name.text
+#   button: |
+#     **Problem:**
+#     ${ x.name.text  }
+# - Edit: x.date_started
+#   button: |
+#     **Date problem started:**
+#     ${ x.date_started } 
+# - Edit: x.date_fixed
+#   button: |
+#     **Date fixed, if any:**
+#     ${ x.date_fixed }
+#ontinue button label: Next
 ---
 id: defenses revisit
 continue button field: defenses.revisit
@@ -2991,30 +3006,28 @@ subquestion: |
 table: defenses.table
 rows: defenses
 columns:
-  - Affirmative defense: |
+  - Affirmative defense (short name): |
       row_item.name.text if defined("row_item.name.text") else ""
-  - Facts that support your defense: |
-      action_button_html(url_action(row_item.attr_name("review_defenses_details")), label="Edit", icon="pencil-alt")
+  - Description and supporting facts: |
+      action_button_html(url_action(row_item.attr_name("name.text")), label="Edit", icon="pencil-alt")
 delete buttons: True
 confirm: True
 ---
-id: defenses edit
-continue button field: x.review_defenses_details
-generic object: DAObject
-question: |
-  Edit affirmative defenses
-review: 
-  - Edit: x.name.text
-    button: |
-      **Short name or description of defense:**
-      ${ x.name.text  }
-  - Edit: x.date_started
-    button: |
-      **Facts that support your defense:**
-      ${ x.details } 
-continue button label: Next
-
-
+#id: defenses edit
+#continue button field: x.review_defenses_details
+#generic object: DAObject
+#question: |
+#  Edit affirmative defenses
+#review: 
+#  - Edit: x.name.text
+#    button: |
+#      **Short name or description of defense:**
+#      ${ x.name.text  }
+#  - Edit: x.date_started
+#    button: |
+#      **Facts that support your defense:**
+#      ${ x.details } 
+#continue button label: Next
 ---
 id: counterclaims section review screen
 event: section_counterclaims
@@ -3053,8 +3066,8 @@ rows: claims
 columns:
   - Your claim and supporting facts: |
       row_item.name.text if defined("row_item.name.text") else ""
-  - What landlord should pay and other relief: |
-      action_button_html(url_action(row_item.attr_name("review_counterclaims_details")), label="Edit", icon="pencil-alt")
+  - Payment and other relief: |
+      action_button_html(url_action(row_item.attr_name("name.text")), label="Edit", icon="pencil-alt")
 delete buttons: True
 confirm: True
 ---
@@ -3130,3 +3143,7 @@ review:
       **Your email:**
       ${ users[0].email }
     show if: users[0].email_notice
+  - Edit: e_signature
+    button: |
+      **Do you want to add your e-signature to your forms?**
+      ${ word(yesno(e_signature)) }
