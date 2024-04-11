@@ -44,7 +44,7 @@ sections:
   - section_counterclaims: Counterclaims (optional)
   - section_delivery: Delivery details
   - section_about_you: About you
-  - section_download: Download  
+  - section_download: Download
 ---
 # interview order block
 mandatory: True
@@ -96,20 +96,20 @@ code: |
   cure_defense
   if conditions_defense:
     conditions.gather()
-  if retaliation_state or retaliation_local:
+  if not retaliation_none:
     retaliation_details
   waiver_defense
   rent_refusal_defense
   if other_defense:
     defenses.gather()
-  additional_defense_information
+  has_additional_info
 
   set_progress(60)
   nav.set_section('section_counterclaims')
   counterclaims_intro
   if has_counterclaims:
     claims.gather()
-  if notice_defense.all_false() and not cure_defense and not conditions_defense and not retaliation_state and not retaliation_local and not waiver_defense and not rent_refusal_defense and not other_defense and additional_defense_information == "" and not has_counterclaims:
+  if notice_defense.all_false() and not cure_defense == "Yes" and not conditions_defense and retaliation_none and not waiver_defense and not rent_refusal_defense and not other_defense and not has_additional_info and not has_counterclaims:
     appearance_only
     
   set_progress(75)
@@ -441,7 +441,7 @@ continue button field: appearance_info
 question: |
   Appearance and jury trial information
 subquestion: |
-  Whether or not you have filed a written Appearance before your court date, you still must go to court to tell the judge that you want to be a part of the case.
+  This program will make an *Appearance* you can file with the court. Whether or not you have filed a written *Appearance* before your court date, you still must go to court to tell the judge that you want to be a part of the case.
 
   You have the right to a jury trial. If you want a jury trial, make sure you select that option in this program. This will check the appropriate box on the Appearance form. If you don't check that box, or if you don't file your Appearance before the court date and time on your Eviction Summons, you may lose the right to a jury trial.
 
@@ -695,11 +695,11 @@ subquestion: |
   
   Note: It does not mean that the landlord can't evict you. It only means that they may have to start over and notify you in the proper way.
 
-  Check all that apply. If none of these apply, you can click **Next**.
+  Check all that apply.
 fields:
   - Notice problems: notice_defense
     datatype: checkboxes
-    none of the above: False
+    #none of the above: False
     choices:
       - __No Notice__ - The landlord says that I did not pay my rent or that I otherwise violated my lease, but I did not get a written notice from the landlord.: no_notice
       - __Improper service of Notice__ - The landlord did not give me notice in a lawful way.: improper_service
@@ -710,7 +710,7 @@ id: cure defense
 question: |
   Cure defense
 subquestion: |
-  If the landlord says you violated the lease, and your lease or a local law gives you time to "cure" or fix the problem, that may be a defense to the eviction.
+  If the landlord says you violated the lease, and your lease or a local law gives you time to fix or "cure" the problem, that may be a defense to the eviction.
 
   This affirmative defense is available only if:
   
@@ -722,7 +722,11 @@ subquestion: |
   **Note:** If you live in Chicago or Cook County, most tenants have a one-time right to stop an eviction for unpaid rent. This is called "pay and stay." You can cure by paying back rent and court costs before a judge signs an Eviction Order. If your building has six units or fewer, this only applies if your landlord does not live in the building.
 fields:
   - Did you fix the lease violation in time?: cure_defense
-    datatype: yesnoradio
+    input type: radio
+    choices:
+      - Yes: Yes
+      - No: No
+      - This does not apply to my case.: "Does not apply"
   - Additional details about how you fixed the lease violation: cure_defense_details
     input type: area
     rows: 5
@@ -730,7 +734,7 @@ fields:
     required: False
     show if:
       variable: cure_defense
-      is: True
+      is: "Yes"
 
 ---
 id: conditions intro
@@ -809,8 +813,14 @@ subquestion: |
 
   Chicago, Cook County, and other local jurisdictions may have extra protections for some renters.
 
-  Check all that apply. If none of these apply, you can click **Next**.
+  Check all that apply.
 fields:
+  - label: |
+      I do not think my landlord filed the eviction in retaliation against me.
+    field: retaliation_none
+    datatype: yesnowide
+    required: False
+    disable others: True
   - label: |
       I am protected from retaliation by **State law**. My landlord retaliated against me because I complained to someone in government about a building code or violation within my unit.
     field: retaliation_state
@@ -821,9 +831,8 @@ fields:
     field: retaliation_local
     datatype: yesnowide
     required: False
-  - Municipality or county ordinance where the property is located: retaliation_ordinance
+  - Town or county ordinance where the property is located: retaliation_ordinance
     maxlength: 25
-    required: False
     show if:
       variable: retaliation_local
       is: True
@@ -846,8 +855,6 @@ fields:
     show if:
       variable: retaliation_complain_to["other"]
       is: True
-    #js show if: 
-    #  val("retaliation_local") == true && val("retaliation_complain_to") == "other"
   - Is your landlord retaliating against you because you did something else?: retaliation_activity
     datatype: yesnoradio
     show if:
@@ -859,6 +866,10 @@ fields:
     maxlength: 70
     js show if: 
       val("retaliation_local") == true && val("retaliation_activity") == true
+validation code: |
+  if not (retaliation_none or retaliation_state or retaliation_local):
+    validation_error("Please select one option.", field="retaliation_local")
+
 ---
 id: retaliation defense details
 question: |
@@ -1024,21 +1035,29 @@ code: |
   if defenses.number_gathered() >= 4:
     defenses.there_is_another = False
 ---
-id: affirmative defense details
+id: additional defense info
 question: |
   Additional information you want the judge to consider
 subquestion: |
   If you have other information you want to tell the judge to explain why you should not be evicted, enter it below.
   
   **Note:** Even if defenses are listed on your forms, you must still bring up all your defenses at trial.
-  
-  If you do not have other information to add, leave this blank.
 fields:
+  - Do you have additional information you want the judge to consider?: has_additional_info
+    datatype: yesnoradio
+  - note: |
+      **Additional information**
+    show if:
+      variable: has_additional_info
+      is: True  
   - no label: additional_defense_information
     input type: area
     rows: 8
     maxlength: 600
     required: False
+    show if:
+      variable: has_additional_info
+      is: True
 
 ---
 id: counterclaims intro
@@ -1525,7 +1544,7 @@ code: |
   #  appearance_additional_3.enabled = True
   #  appearance_additional_blank.enabled = True
 
-  if notice_defense.any_true() or cure_defense or conditions_defense or retaliation_state or retaliation_local or waiver_defense or rent_refusal_defense or other_defense or additional_defense_information != "" or has_counterclaims:
+  if notice_defense.any_true() or cure_defense == "Yes" or conditions_defense or retaliation_none == False or waiver_defense or rent_refusal_defense or other_defense or has_additional_info or has_counterclaims:
     eviction_answer.enabled = True
     if optional_answer:
       if general_denial == False:
@@ -1536,8 +1555,12 @@ code: |
       if conditions.number() > 3:
         additional_conditions.enabled = True
 
+    if other_defense:
+      if defenses.number() > 1:
+        additional_defenses_counterclaims.enabled = True
+
     if has_counterclaims:
-      if claims.number() > 1 or defenses.number() > 1:
+      if claims.number() > 1:
         additional_defenses_counterclaims.enabled = True
 
 ---
@@ -2018,8 +2041,8 @@ attachment:
     - "improper_notice": ${ notice_defense["improper_notice"] }
     - "inadequate_notice": ${ notice_defense["inadequate_notice"] }
 	
-    - "cure_cb": ${ cure_defense }
-    - "cure_details": ${ cure_defense_details if cure_defense else '' }
+    - "cure_cb": ${ True if cure_defense == "Yes" else '' }
+    - "cure_details": ${ cure_defense_details if cure_defense == "Yes" else '' }
 
     - "conditions_cb": ${ conditions_defense }
     - "conditions_detail_1": ${ conditions[0].name.text if conditions_defense else '' }
@@ -2033,21 +2056,21 @@ attachment:
     - "conconditions_fixed_3": ${ format_date(conditions[2].date_fixed, format='MMM d, yyyy') if conditions_defense and conditions[2].date_fixed !='' else '' }
     - "additional_conditions": ${ conditions.number() > 3 }
 
-    - "retaliation_cb": ${ retaliation_state or retaliation_local }
-    - "retaliation_state": ${ retaliation_state }
-    - "retaliation_local": ${ retaliation_local }
-    - "retaliation_ordinance": ${ retaliation_ordinance if retaliation_local else '' }
-    - "retaliation_landlord": ${ retaliation_complain_to["landlord"] and retaliation_local }
-    - "retaliation_legal_org": ${ retaliation_complain_to["legal_org"] and retaliation_local }
-    - "retaliation_community_group": ${ retaliation_complain_to["community_group"] and retaliation_local }
-    - "retaliation_government": ${ retaliation_complain_to["government"] and retaliation_local }
-    - "retaliation_media": ${ retaliation_complain_to["media"] and retaliation_local }
-    - "retaliation_tenants_org": ${ retaliation_complain_to["tenants_org"] and retaliation_local }
-    - "retaliation_other": ${ retaliation_complain_to["other"] and retaliation_local }
-    - "retaliation_complain_to_other": ${ retaliation_complain_to_other if retaliation_complain_to["other"] and retaliation_local else '' }
-    - "retaliation_activity": ${ retaliation_activity and retaliation_local }
-    - "retaliation_activity_name": ${ retaliation_activity_name if retaliation_activity and retaliation_local else '' }
-    - "retaliation_details": ${ retaliation_details if retaliation_state or retaliation_local else '' }
+    - "retaliation_cb": ${ (retaliation_state or retaliation_local) and retaliation_none == False }
+    - "retaliation_state": ${ (retaliation_state) and retaliation_none == False }
+    - "retaliation_local": ${ (retaliation_local) and retaliation_none == False }
+    - "retaliation_ordinance": ${ retaliation_ordinance if retaliation_local and retaliation_none == False else '' }
+    - "retaliation_landlord": ${ retaliation_complain_to["landlord"] and retaliation_local and retaliation_none == False}
+    - "retaliation_legal_org": ${ retaliation_complain_to["legal_org"] and retaliation_local and retaliation_none == False}
+    - "retaliation_community_group": ${ retaliation_complain_to["community_group"] and retaliation_local and retaliation_none == False}
+    - "retaliation_government": ${ retaliation_complain_to["government"] and retaliation_local and retaliation_none == False}
+    - "retaliation_media": ${ retaliation_complain_to["media"] and retaliation_local and retaliation_none == False}
+    - "retaliation_tenants_org": ${ retaliation_complain_to["tenants_org"] and retaliation_local and retaliation_none == False}
+    - "retaliation_other": ${ retaliation_complain_to["other"] and retaliation_local and retaliation_none == False}
+    - "retaliation_complain_to_other": ${ retaliation_complain_to_other if retaliation_complain_to["other"] and retaliation_local and retaliation_none == False else '' }
+    - "retaliation_activity": ${ retaliation_activity and retaliation_local and retaliation_none == False }
+    - "retaliation_activity_name": ${ retaliation_activity_name if retaliation_activity and retaliation_local and retaliation_none == False else '' }
+    - "retaliation_details": ${ retaliation_details if (retaliation_state or retaliation_local) and retaliation_none == False else '' }
 
     - "waiver_cb": ${ waiver_defense }
     - "new_lease_date": ${ new_lease_signed_date if waiver_defense else '' }
@@ -2063,7 +2086,7 @@ attachment:
     - "other_defense_name_1": ${ defenses[0].name.text if other_defense else '' }
     - "other_defense_details_1": ${ defenses[0].details if other_defense else '' }
     - "additional_affirmative_defenses": ${ defenses.number() > 1 }
-    - "additional_defense_information": ${ additional_defense_information }
+    - "additional_defense_information": ${ additional_defense_information if has_additional_info else '' }
 
     - "has_counterclaims": ${ has_counterclaims }
     - "claim_text_1": ${ claims[0].name.text if has_counterclaims else '' }
@@ -2379,12 +2402,12 @@ review:
   - Edit: cure_defense
     button: |
       **Did you fix the lease violation in time given by the lease or local law, also known as the "cure" defense?**
-      ${ word(yesno(cure_defense)) }      
+      ${ cure_defense }
   - Edit: cure_defense_details
     button: |
       **Cure defense details:**
       ${ cure_defense_details }
-    show if: cure_defense
+    show if: cure_defense == "Yes"
   - Edit: conditions_defense
     button: |
       **Were there bad property conditions?**
@@ -2400,10 +2423,9 @@ review:
   - Edit: retaliation_state
     button: |
       **Did the landlord file the eviction in retaliation?**
-      % if retaliation_state == False and retaliation_local == False:
+      % if retaliation_none:
       No
-      % endif
-      % if retaliation_state or retaliation_local:
+      % else:
       
       % if retaliation_state:
       * Yes, in violation of state law.
@@ -2416,7 +2438,7 @@ review:
     button: |
       **Municipality or county ordinance where property located:**
       ${ retaliation_ordinance }
-    show if: retaliation_local
+    show if: retaliation_local and retaliation_none == False
   - Edit: retaliation_complain_to
     button: |
       **Who did you complain to?**
@@ -2442,27 +2464,27 @@ review:
       % if retaliation_complain_to['other']:
       * Another person or entity
       % endif
-    show if: retaliation_local
+    show if: retaliation_local and retaliation_none == False
   - Edit: retaliation_complain_to_other
     button: |
       **Other person or entity you complained to:**
       ${ retaliation_complain_to_other }
-    show if: retaliation_local and retaliation_complain_to['other']
+    show if: retaliation_local and retaliation_complain_to['other'] and retaliation_none == False
   - Edit: retaliation_activity
     button: |
       **Is your landlord retaliating against you because you did something else?**
       ${ word(yesno(retaliation_activity)) }      
-    show if: retaliation_local
+    show if: retaliation_local and retaliation_none == False
   - Edit: retaliation_activity_name
     button: |
       **Other protected activity:**
       ${ retaliation_activity_name }      
-    show if: retaliation_local and retaliation_activity
+    show if: retaliation_local and retaliation_activity and retaliation_none == False
   - Edit: retaliation_details
     button: |
       **Retaliation details:**
       ${ retaliation_details}
-    show if: retaliation_state or retaliation_local
+    show if: retaliation_state or retaliation_local and retaliation_none == False
   - Edit: waiver_defense
     button: |
       **Did the landlord act like the lease continued after learning of a lease violation, also known as a "waiver" defense?**
@@ -2513,13 +2535,13 @@ review:
         * ${ my_var.name.text }
       % endfor
     show if: other_defense
-  - Edit: additional_defense_information
+  - Edit: has_additional_info
     button: |
       **Additional information you want the judge to consider:**
-      % if additional_defense_information == "":
-      None
-      % else:
+      % if has_additional_info:
       ${ additional_defense_information }
+      % else:
+      None
       % endif
   - Edit: has_counterclaims
     button: |
@@ -2807,12 +2829,12 @@ review:
   - Edit: cure_defense
     button: |
       **Did you fix the lease violation in time given by the lease or local law, also known as the "cure" defense?**
-      ${ word(yesno(cure_defense)) }      
+      ${ cure_defense }
   - Edit: cure_defense_details
     button: |
       **Cure defense details:**
       ${ cure_defense_details }
-    show if: cure_defense
+    show if: cure_defense == "Yes"
   - Edit: conditions_defense
     button: |
       **Were there bad property conditions?**
@@ -2828,10 +2850,9 @@ review:
   - Edit: retaliation_state
     button: |
       **Did the landlord file the eviction in retaliation?**
-      % if retaliation_state == False and retaliation_local == False:
+      % if retaliation_none:
       No
-      % endif
-      % if retaliation_state or retaliation_local:
+      % else:
       
       % if retaliation_state:
       * Yes, in violation of state law.
@@ -2844,7 +2865,7 @@ review:
     button: |
       **Municipality or county ordinance where property located:**
       ${ retaliation_ordinance }
-    show if: retaliation_local
+    show if: retaliation_local and retaliation_none == False
   - Edit: retaliation_complain_to
     button: |
       **Who did you complain to?**
@@ -2870,27 +2891,27 @@ review:
       % if retaliation_complain_to['other']:
       * Another person or entity
       % endif
-    show if: retaliation_local
+    show if: retaliation_local and retaliation_none == False
   - Edit: retaliation_complain_to_other
     button: |
       **Other person or entity you complained to:**
       ${ retaliation_complain_to_other }
-    show if: retaliation_local and retaliation_complain_to['other']
+    show if: retaliation_local and retaliation_complain_to['other'] and retaliation_none == False
   - Edit: retaliation_activity
     button: |
       **Is your landlord retaliating against you because you did something else?**
       ${ word(yesno(retaliation_activity)) }      
-    show if: retaliation_local
+    show if: retaliation_local and retaliation_none == False
   - Edit: retaliation_activity_name
     button: |
       **Other protected activity:**
       ${ retaliation_activity_name }      
-    show if: retaliation_local and retaliation_activity
+    show if: retaliation_local and retaliation_activity and retaliation_none == False
   - Edit: retaliation_details
     button: |
       **Retaliation details:**
       ${ retaliation_details}
-    show if: retaliation_state or retaliation_local
+    show if: retaliation_state or retaliation_local and retaliation_none == False
   - Edit: waiver_defense
     button: |
       **Did the landlord act like the lease continued after learning of a lease violation, also known as a "waiver" defense?**
@@ -2941,13 +2962,13 @@ review:
         * ${ my_var.name.text }
       % endfor
     show if: other_defense
-  - Edit: additional_defense_information
+  - Edit: has_additional_info
     button: |
       **Additional information you want the judge to consider:**
-      % if additional_defense_information == "":
-      None
-      % else:
+      % if has_additional_info:
       ${ additional_defense_information }
+      % else:
+      None
       % endif
 
 ---
@@ -3071,22 +3092,21 @@ columns:
 delete buttons: True
 confirm: True
 ---
-id: counterclaims edit
-continue button field: x.review_counterclaims_details
-generic object: DAObject
-question: |
-  Edit counterclaims
-review: 
-  - Edit: x.name.text
-    button: |
-      **Your claim and supporting facts:**
-      ${ x.name.text  }
-  - Edit: x.date_started
-    button: |
-      **What the landlord should pay you and other relief:**
-      ${ x.details } 
-continue button label: Next
-
+#id: counterclaims edit
+#continue button field: x.review_counterclaims_details
+#generic object: DAObject
+#question: |
+#  Edit counterclaims
+#review: 
+#  - Edit: x.name.text
+#    button: |
+#      **Your claim and supporting facts:**
+#      ${ x.name.text  }
+#  - Edit: x.date_started
+#    button: |
+#      **What the landlord should pay you and other relief:**
+#      ${ x.details } 
+#continue button label: Next
 ---
 id: delivery info review screen
 event: section_delivery
