@@ -128,7 +128,6 @@ code: |
       person.delivery_date
       
   hand_delivery_info    
-  e_signature
 
   set_progress(90)
   nav.set_section('section_about_you')
@@ -136,6 +135,7 @@ code: |
   users[0].phone_number
   if users[0].email_notice == True:
     users[0].email
+  e_signature
 
   set_progress(100)
   nav.set_section('section_download')
@@ -226,12 +226,12 @@ continue button field: challenge_service
 question: |
   Think about defenses
 subquestion: |
-  There can be many defenses to an eviction lawsuit. However, a few special defenses must be brought up **before** you file your Answer. If you want to:
+  There can be many defenses to an eviction lawsuit. However, a few special defenses must be brought up **before** you file your Answer.
+  
+  You need to file a Motion **before** you file your Answer if you want to:
   
   * Challenge the way the Summons and Complaint were received by you, also called service of process, or
-  * Dismiss the Complaint because the lawsuit does not have a legal basis,
-  
-  Then you need to file a Motion **before** you file your Answer.
+  * Dismiss the Complaint because the lawsuit does not have a legal basis.
 
   You should talk with a lawyer about whether you have a legal reason to challenge how the Eviction Complaint was received or whether you have a legal reason to have it dismissed.
   
@@ -245,11 +245,22 @@ subquestion: |
 
   ${ collapse_template(other_evictions_help) }
   
-  **Note:** Receiving a Notice of Termination from your landlord is not the same as being evicted in a lawsuit. If you received an Eviction Complaint and a Summons from the sheriff, you were likely sued in court.  
+  **Note:** Receiving a **{Notice of Termination}** from your landlord is not the same as being evicted in a lawsuit. If you received an **{Eviction Complaint}** and a **{Summons}** from the sheriff, you were likely sued in court.
 
 fields:
   - no label: eviction_case
     datatype: yesnoradio
+terms:
+  - Notice of Termination: |
+      A notice to a tenant that their lease is ending. A lease can be terminated for different reasons. For example:
+      
+      * the tenant did not pay rent,
+      * the tenant violated a term of the lease, or
+      * the landlord does not want to renew the lease at the end of the lease period.
+  - Eviction Complaint: |
+      A court document used by a landlord to ask the court to evict the tenant.
+  - Summons: |
+      A notice to a defendant that a lawsuit against them was filed in a court and that the defendant has to show up in court.
 ---
 id: not eviction kickout
 event: not_eviction_kickout
@@ -281,6 +292,7 @@ content: |
   * Condominium owners being sued by the association, or
   * Contracts for deed (also called rent to own agreements or installment sales agreements).
 ---
+
 id: rental property address
 question: |
   What is the address of the rental property?
@@ -446,6 +458,8 @@ subquestion: |
   You have the right to a jury trial. If you want a jury trial, make sure you select that option in this program. This will check the appropriate box on the Appearance form. If you don't check that box, or if you don't file your Appearance before the court date and time on your Eviction Summons, you may lose the right to a jury trial.
 
   If you haven't requested a jury by the first court date, the judge may give you additional time to do so if you ask, but there is no guarantee you will get extra time.
+  
+  To learn more, read ILAO's article about [**jury trials and judge trials**](https://www.illinoislegalaid.org/node/178441).
 ---
 id: case number
 question: |
@@ -744,6 +758,8 @@ subquestion: |
   If the landlord is trying to evict you for not paying rent and the rental property has bad conditions that decreased its value more than the rent you owe, then you may have a defense to the eviction.
   
   Even if the value of the property has been reduced a little by the bad property conditions, this could mean that you owe the landlord less money in unpaid rent. If you do not pay the landlord the full amount you owe, you may be evicted.
+  
+  Examples of bad property conditions include: water leaking into the apartment, kitchen appliances that don't work, bug or rodent infestations.
 fields:
   Were there bad property conditions?: conditions_defense
   datatype: yesnoradio
@@ -964,35 +980,33 @@ id: other affirmative defense intro
 question: |
   Other affirmative defenses
 subquestion: |
-  % if 1==1:
+  % if notice_defense.any_true() or cure_defense == "Yes" or conditions_defense or retaliation_none == False or waiver_defense or rent_refusal_defense:
   The following affirmative defenses will be included in your forms:
 
-  % endif
-  % if 1==1:
+  % if notice_defense.any_true():
   * You received no written notice or an improper written notice before the landlord filed the eviction case.
   % endif
-  % if 1==1:
+  % if cure_defense == "Yes":
   * You cured or fixed the lease violation within the allowed time period.
   % endif
-  % if 1==1:
+  % if conditions_defense:
   * Bad property conditions made the rental unit worth less than the rent you owe.
   % endif
-  % if 1==1:
+  % if retaliation_none == False:
   * The landlord is retaliating against you for something you did.
   % endif
-  % if 1==1:
+  % if waiver_defense:
   * After the landlord started to evict you for violating the lease, they signed a new lease or accepted your rent payment.
   % endif
-  % if 1==1:
-  * You tried to pay your rent, but the landlord refuse to accept it.
+  % if rent_refusal_defense:
+  * You tried to pay your rent, but the landlord refused to accept it.
   % endif
-  % if 1==1:
+  
+  If you have other affirmative defenses not listed above, select **Yes**. Remember, you will be responsible for proving any affirmative defense you bring up.
+  % else:
   Based on your answers, the most common affirmative defenses do not apply in your case.
   
   If you have another affirmative defense to the eviction, select **Yes**. Remember, you will be responsible for proving any affirmative defense you bring up.
-  % else:
-  
-  If you have other affirmative defenses not listed above, select **Yes**. Remember, you will be responsible for proving any affirmative defense you bring up.
   % endif
   
   An example defense is that the landlord no longer owns the rental property. Learn about other affirmative defenses by reading ILAO's article on [**common eviction defenses**](https://www.illinoislegalaid.org/node/31006).
@@ -1040,7 +1054,9 @@ question: |
   Additional information you want the judge to consider
 subquestion: |
   If you have other information you want to tell the judge to explain why you should not be evicted, enter it below.
-  
+
+  Learn about other possible defenses by reading ILAO's article on [**common eviction defenses**](https://www.illinoislegalaid.org/node/31006).
+
   **Note:** Even if defenses are listed on your forms, you must still bring up all your defenses at trial.
 fields:
   - Do you have additional information you want the judge to consider?: has_additional_info
@@ -1975,65 +1991,65 @@ attachment:
     - "case_number__5": ${ case_number }
     - "unknown_occupants_cb": ${ unknown_occupants }
     - "property_address": ${ rental_property.on_one_line(bare=True) }
-    - "general_denial_cb": ${ general_denial }
-    - "specific_para_answer_cb": ${ True if general_denial == False else '' }
+    - "general_denial_cb": ${ general_denial and optional_answer }
+    - "specific_para_answer_cb": ${ True if general_denial == False and optional_answer else '' }
           
-    - "para0": ${ answer_responses[0].para }
-    - "sub0": ${ answer_responses[0].sub }
-    - "admit0": ${ True if answer_responses[0].response == "Admit" else False }
-    - "deny0": ${ True if answer_responses[0].response == "Deny" else False }
-    - "idk0": ${ True if answer_responses[0].response == "Do not know" else False }
-    - "para1": ${ answer_responses[1].para }
-    - "sub1": ${ answer_responses[1].sub }
-    - "admit1": ${ True if answer_responses[1].response == "Admit" else False }
-    - "deny1": ${ True if answer_responses[1].response == "Deny" else False }
-    - "idk1": ${ True if answer_responses[1].response == "Do not know" else False }
-    - "para2": ${ answer_responses[2].para }
-    - "sub2": ${ answer_responses[2].sub }
-    - "admit2": ${ True if answer_responses[2].response == "Admit" else False }
-    - "deny2": ${ True if answer_responses[2].response == "Deny" else False }
-    - "idk2": ${ True if answer_responses[2].response == "Do not know" else False }
-    - "para3": ${ answer_responses[3].para }
-    - "sub3": ${ answer_responses[3].sub }
-    - "admit3": ${ True if answer_responses[3].response == "Admit" else False }
-    - "deny3": ${ True if answer_responses[3].response == "Deny" else False }
-    - "idk3": ${ True if answer_responses[3].response == "Do not know" else False }
-    - "para4": ${ answer_responses[4].para }
-    - "sub4": ${ answer_responses[4].sub }
-    - "admit4": ${ True if answer_responses[4].response == "Admit" else False }
-    - "deny4": ${ True if answer_responses[4].response == "Deny" else False }
-    - "idk4": ${ True if answer_responses[4].response == "Do not know" else False }
-    - "para5": ${ answer_responses[5].para }
-    - "sub5": ${ answer_responses[5].sub }
-    - "admit5": ${ True if answer_responses[5].response == "Admit" else False }
-    - "deny5": ${ True if answer_responses[5].response == "Deny" else False }
-    - "idk5": ${ True if answer_responses[5].response == "Do not know" else False }
-    - "para6": ${ answer_responses[6].para }
-    - "sub6": ${ answer_responses[6].sub }
-    - "admit6": ${ True if answer_responses[6].response == "Admit" else False }
-    - "deny6": ${ True if answer_responses[6].response == "Deny" else False }
-    - "idk6": ${ True if answer_responses[6].response == "Do not know" else False }
-    - "para7": ${ answer_responses[7].para }
-    - "sub7": ${ answer_responses[7].sub }
-    - "admit7": ${ True if answer_responses[7].response == "Admit" else False }
-    - "deny7": ${ True if answer_responses[7].response == "Deny" else False }
-    - "idk7": ${ True if answer_responses[7].response == "Do not know" else False }
-    - "para8": ${ answer_responses[8].para }
-    - "sub8": ${ answer_responses[8].sub }
-    - "admit8": ${ True if answer_responses[8].response == "Admit" else False }
-    - "deny8": ${ True if answer_responses[8].response == "Deny" else False }
-    - "idk8": ${ True if answer_responses[8].response == "Do not know" else False }
-    - "para9": ${ answer_responses[9].para }
-    - "sub9": ${ answer_responses[9].sub }
-    - "admit9": ${ True if answer_responses[9].response == "Admit" else False }
-    - "deny9": ${ True if answer_responses[9].response == "Deny" else False }
-    - "idk9": ${ True if answer_responses[9].response == "Do not know" else False }
-    - "para10": ${ answer_responses[10].para }
-    - "sub10": ${ answer_responses[10].sub }
-    - "admit10": ${ True if answer_responses[10].response == "Admit" else False }
-    - "deny10": ${ True if answer_responses[10].response == "Deny" else False }
-    - "idk10": ${ True if answer_responses[10].response == "Do not know" else False }
-    - "additional_answer_cb": ${ answer_responses.number() > 10 }
+    - "para0": ${ answer_responses[0].para if general_denial == False and optional_answer else '' }
+    - "sub0": ${ answer_responses[0].sub if general_denial == False and optional_answer else '' }
+    - "admit0": ${ True if answer_responses[0].response == "Admit" and general_denial == False and optional_answer else False }
+    - "deny0": ${ True if answer_responses[0].response == "Deny" and general_denial == False and optional_answer else False }
+    - "idk0": ${ True if answer_responses[0].response == "Do not know" and general_denial == False and optional_answer else False }
+    - "para1": ${ answer_responses[1].para if general_denial == False and optional_answer else '' }
+    - "sub1": ${ answer_responses[1].sub if general_denial == False and optional_answer else '' }
+    - "admit1": ${ True if answer_responses[1].response == "Admit" and general_denial == False and optional_answer else False }
+    - "deny1": ${ True if answer_responses[1].response == "Deny" and general_denial == False and optional_answer else False }
+    - "idk1": ${ True if answer_responses[1].response == "Do not know" and general_denial == False and optional_answer else False }
+    - "para2": ${ answer_responses[2].para if general_denial == False and optional_answer else '' }
+    - "sub2": ${ answer_responses[2].sub if general_denial == False and optional_answer else '' }
+    - "admit2": ${ True if answer_responses[2].response == "Admit" and general_denial == False and optional_answer else False }
+    - "deny2": ${ True if answer_responses[2].response == "Deny" and general_denial == False and optional_answer else False }
+    - "idk2": ${ True if answer_responses[2].response == "Do not know" and general_denial == False and optional_answer else False }
+    - "para3": ${ answer_responses[3].para if general_denial == False and optional_answer else '' }
+    - "sub3": ${ answer_responses[3].sub if general_denial == False and optional_answer else '' }
+    - "admit3": ${ True if answer_responses[3].response == "Admit" and general_denial == False and optional_answer else False }
+    - "deny3": ${ True if answer_responses[3].response == "Deny" and general_denial == False and optional_answer else False }
+    - "idk3": ${ True if answer_responses[3].response == "Do not know" and general_denial == False and optional_answer else False }
+    - "para4": ${ answer_responses[4].para if general_denial == False and optional_answer else '' }
+    - "sub4": ${ answer_responses[4].sub if general_denial == False and optional_answer else '' }
+    - "admit4": ${ True if answer_responses[4].response == "Admit" and general_denial == False and optional_answer else False }
+    - "deny4": ${ True if answer_responses[4].response == "Deny" and general_denial == False and optional_answer else False }
+    - "idk4": ${ True if answer_responses[4].response == "Do not know" and general_denial == False and optional_answer else False }
+    - "para5": ${ answer_responses[5].para if general_denial == False and optional_answer else '' }
+    - "sub5": ${ answer_responses[5].sub if general_denial == False and optional_answer else '' }
+    - "admit5": ${ True if answer_responses[5].response == "Admit" and general_denial == False and optional_answer else False }
+    - "deny5": ${ True if answer_responses[5].response == "Deny" and general_denial == False and optional_answer else False }
+    - "idk5": ${ True if answer_responses[5].response == "Do not know" and general_denial == False and optional_answer else False }
+    - "para6": ${ answer_responses[6].para if general_denial == False and optional_answer else '' }
+    - "sub6": ${ answer_responses[6].sub if general_denial == False and optional_answer else '' }
+    - "admit6": ${ True if answer_responses[6].response == "Admit" and general_denial == False and optional_answer else False }
+    - "deny6": ${ True if answer_responses[6].response == "Deny" and general_denial == False and optional_answer else False }
+    - "idk6": ${ True if answer_responses[6].response == "Do not know" and general_denial == False and optional_answer else False }
+    - "para7": ${ answer_responses[7].para if general_denial == False and optional_answer else '' }
+    - "sub7": ${ answer_responses[7].sub if general_denial == False and optional_answer else '' }
+    - "admit7": ${ True if answer_responses[7].response == "Admit" and general_denial == False and optional_answer else False }
+    - "deny7": ${ True if answer_responses[7].response == "Deny" and general_denial == False and optional_answer else False }
+    - "idk7": ${ True if answer_responses[7].response == "Do not know" and general_denial == False and optional_answer else False }
+    - "para8": ${ answer_responses[8].para if general_denial == False and optional_answer else '' }
+    - "sub8": ${ answer_responses[8].sub if general_denial == False and optional_answer else '' }
+    - "admit8": ${ True if answer_responses[8].response == "Admit" and general_denial == False and optional_answer else False }
+    - "deny8": ${ True if answer_responses[8].response == "Deny" and general_denial == False and optional_answer else False }
+    - "idk8": ${ True if answer_responses[8].response == "Do not know" and general_denial == False and optional_answer else False }
+    - "para9": ${ answer_responses[9].para if general_denial == False and optional_answer else '' }
+    - "sub9": ${ answer_responses[9].sub if general_denial == False and optional_answer else '' }
+    - "admit9": ${ True if answer_responses[9].response == "Admit" and general_denial == False and optional_answer else False }
+    - "deny9": ${ True if answer_responses[9].response == "Deny" and general_denial == False and optional_answer else False }
+    - "idk9": ${ True if answer_responses[9].response == "Do not know" and general_denial == False and optional_answer else False }
+    - "para10": ${ answer_responses[10].para if general_denial == False and optional_answer else '' }
+    - "sub10": ${ answer_responses[10].sub if general_denial == False and optional_answer else '' }
+    - "admit10": ${ True if answer_responses[10].response == "Admit" and general_denial == False and optional_answer else False }
+    - "deny10": ${ True if answer_responses[10].response == "Deny" and general_denial == False and optional_answer else False }
+    - "idk10": ${ True if answer_responses[10].response == "Do not know" and general_denial == False and optional_answer else False }
+    - "additional_answer_cb": ${ True if answer_responses.number() > 10 and general_denial == False and optional_answer else '' }
 
     - "notice_cb": ${ notice_defense.any_true() }
     - "no_notice": ${ notice_defense["no_notice"] }
@@ -2054,7 +2070,7 @@ attachment:
     - "conconditions_fixed_1": ${ format_date(conditions[0].date_fixed, format='MMM d, yyyy') if conditions_defense and conditions[0].date_fixed !='' else '' }
     - "conconditions_fixed_2": ${ format_date(conditions[1].date_fixed, format='MMM d, yyyy') if conditions_defense and conditions[1].date_fixed !='' else '' }
     - "conconditions_fixed_3": ${ format_date(conditions[2].date_fixed, format='MMM d, yyyy') if conditions_defense and conditions[2].date_fixed !='' else '' }
-    - "additional_conditions": ${ conditions.number() > 3 }
+    - "additional_conditions": ${ True if conditions_defense and conditions.number() > 3 else ''}
 
     - "retaliation_cb": ${ (retaliation_state or retaliation_local) and retaliation_none == False }
     - "retaliation_state": ${ (retaliation_state) and retaliation_none == False }
@@ -2085,13 +2101,13 @@ attachment:
     - "other_defense_cb": ${ other_defense }
     - "other_defense_name_1": ${ defenses[0].name.text if other_defense else '' }
     - "other_defense_details_1": ${ defenses[0].details if other_defense else '' }
-    - "additional_affirmative_defenses": ${ defenses.number() > 1 }
+    - "additional_affirmative_defenses": ${ True if other_defense and defenses.number() > 1 else ''}
     - "additional_defense_information": ${ additional_defense_information if has_additional_info else '' }
 
     - "has_counterclaims": ${ has_counterclaims }
     - "claim_text_1": ${ claims[0].name.text if has_counterclaims else '' }
     - "claim_relief_1": ${ claims[0].details if has_counterclaims else '' }
-    - "additional_counterclaims": ${ claims.number() > 1 }
+    - "additional_counterclaims": ${ True if has_counterclaims and claims.number() > 1 else '' }
 
     - "e_sign_name__1": ${ users[0].name.full(middle="full") if e_signature else '' }
     - "e_sign_name__2": ${ users[0].name.full(middle="full") if e_signature else '' }
@@ -2420,7 +2436,7 @@ review:
         * ${ my_var.name.text }
       % endfor
     show if: conditions_defense
-  - Edit: retaliation_state
+  - Edit: retaliation_none
     button: |
       **Did the landlord file the eviction in retaliation?**
       % if retaliation_none:
@@ -2484,7 +2500,7 @@ review:
     button: |
       **Retaliation details:**
       ${ retaliation_details}
-    show if: retaliation_state or retaliation_local and retaliation_none == False
+    show if: (retaliation_state or retaliation_local) and retaliation_none == False
   - Edit: waiver_defense
     button: |
       **Did the landlord act like the lease continued after learning of a lease violation, also known as a "waiver" defense?**
@@ -2733,6 +2749,7 @@ review:
 ---
 id: case info review screen
 event: section_case_info
+section: Case info
 question: |
   Case info
 subquestion: |
@@ -2778,6 +2795,7 @@ review:
 ---
 id: responses section review screen
 event: section_answer
+section: Responses
 question: |
   Responses
 subquestion: |
@@ -2802,6 +2820,7 @@ review:
 ---
 id: affirmative defenses section review screen
 event: section_defenses
+section: Affirmative defenses
 question: |
   Affirmative defenses
 subquestion: |
@@ -2847,7 +2866,7 @@ review:
         * ${ my_var.name.text }
       % endfor
     show if: conditions_defense
-  - Edit: retaliation_state
+  - Edit: retaliation_none
     button: |
       **Did the landlord file the eviction in retaliation?**
       % if retaliation_none:
@@ -2911,7 +2930,7 @@ review:
     button: |
       **Retaliation details:**
       ${ retaliation_details}
-    show if: retaliation_state or retaliation_local and retaliation_none == False
+    show if: (retaliation_state or retaliation_local) and retaliation_none == False
   - Edit: waiver_defense
     button: |
       **Did the landlord act like the lease continued after learning of a lease violation, also known as a "waiver" defense?**
@@ -3052,6 +3071,7 @@ confirm: True
 ---
 id: counterclaims section review screen
 event: section_counterclaims
+section: Counterclaims (optional)
 question: |
   Counterclaims
 subquestion: |
@@ -3110,6 +3130,7 @@ confirm: True
 ---
 id: delivery info review screen
 event: section_delivery
+section: Delivery details
 question: |
   Delivery details
 subquestion: |
@@ -3129,14 +3150,11 @@ review:
       % for my_var in other_parties:
         * ${ my_var.name.full(middle="full") }
       % endfor
-  - Edit: e_signature
-    button: |
-      **Do you want to add your e-signature to your forms?**
-      ${ word(yesno(e_signature)) }
 
 ---
 id: about you review screen
 event: section_about_you
+section: About you
 question: |
   About you
 subquestion: |
