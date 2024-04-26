@@ -111,7 +111,8 @@ code: |
     claims.gather()
   if notice_defense.all_false() and not cure_defense == "Yes" and not conditions_defense and retaliation_none and not waiver_defense and not rent_refusal_defense and not other_defense and not has_additional_info and not has_counterclaims:
     appearance_only
-    
+  eviction_answer_check
+  
   set_progress(75)
   nav.set_section('section_delivery')
   delivery_intro
@@ -192,10 +193,8 @@ subquestion: |
   * You can **hire a lawyer** to help you. If you do not have money to hire one, you may be able to find a legal aid lawyer who will help you for free.
   * You can **look for local services** such as legal representation, mediation, rental assistance programs, or other resources to help you resolve the case. You can look for help at [**Eviction Help Illinois**](https://www.illinoislegalaid.org/evictionhelpillinois) or apply for help by texting "Eviction" to 85622.
   * If you live in Cook County, Cook County Legal Aid for Housing and Debt (CCLAHD) can help resolve housing problems. Visit the [**CCLAHD website**](https://www.cookcountylegalaid.org/) or call 855-956-5763.
-  * You can **represent yourself**. If you don't hire a lawyer, there is paperwork you can file to get into the case and defend yourself. This is called appearing “pro se.”
+  * You can **represent yourself**. If you don't hire a lawyer, there is paperwork you can file to get into the case and defend yourself. **Note:** You can also just go to court without filing any paperwork. Representing yourself is called appearing "pro se."
   * You can **do nothing**. If you ignore the lawsuit, you will probably be evicted and a judgment for money may be entered against you.
-  
-  If you would like help finding free or low-cost legal services in your area, use [**Get Legal Help**](https://www.illinoislegalaid.org/get-legal-help).
 ---
 id: eviction forms
 continue button field: eviction_forms
@@ -207,11 +206,14 @@ subquestion: |
   * **Appearance**: Tells the judge and the Plaintiff (for example, the landlord or owner) that you are participating in the case. It also says whether you want a trial by judge only or by judge and jury.
   * **Answer**: Your response to each paragraph in the Eviction Complaint, either all together or one-by-one.
   * **Affirmative Defenses**: Your reasons why the Plaintiff should not win the case even if everything in the complaint is true.
-  * **Counterclaims**: Your separate legal claim(s) against the Plaintiff, specifically stating what relief you want from the court. Counterclaims must be directly related to the eviction, or the judge may dismiss them.
+  * **Counterclaims**: Your separate legal claim(s) against the Plaintiff, specifically stating what **{relief}** you want from the court. Counterclaims must be directly related to the eviction, or the judge may dismiss them.
 
   After you download your forms, you must file them with the court. This program **does not** file your forms for you.
   
-  To learn more, read the "How to Respond to an Eviction Complaint" instructions you can download at the end of this program. 
+  To learn more, read the "How to Respond to an Eviction Complaint" instructions you can download at the end of this program.
+terms:
+  - relief: |
+      **Relief** is what you want the court to order. For example, you can ask the court to enter an order that says the landlord must pay you money or make a repair.
 ---
 template: get_legal_help
 subject: |
@@ -230,10 +232,10 @@ subquestion: |
   
   You need to file a Motion **before** you file your Answer if you want to:
   
-  * Challenge the way the Summons and Complaint were received by you, also called service of process, or
+  * Challenge the way the Summons and Complaint were delivered to you, also called service of process, or
   * Dismiss the Complaint because the lawsuit does not have a legal basis.
 
-  You should talk with a lawyer about whether you have a legal reason to challenge how the Eviction Complaint was received or whether you have a legal reason to have it dismissed.
+  You should talk with a lawyer about whether you have a legal reason to challenge how the Eviction Complaint was delivered or whether you have a legal reason to have it dismissed. You can also read ILAO's article about a [**Motion to Quash**](https://www.illinoislegalaid.org/node/50146).
   
   If you would like help finding free or low-cost legal services in your area, use [**Get Legal Help**](https://www.illinoislegalaid.org/get-legal-help).
 ---
@@ -361,7 +363,7 @@ fields:
 ---
 template: long_name_help
 subject: |
-  **What if the person's name doesn't fit into 4 fields?**
+  **What if I need more space?**
 content: |
   If the party has a long name like "Jane Smith, Director of Housing," select **Business or organization**. You can then enter the full name and title.
 ---
@@ -370,9 +372,19 @@ question: |
   Are "Unknown Occupants" listed as defendants on your Eviction Complaint?
 subquestion: |
   Answer **Yes** if they were listed on the Eviction Complaint. They could be listed as defendants or there might be a checkbox.
+
+  ${collapse_template(unknown_occupants_help)}
 fields:
   - "Are Unknown Occupants listed on the Eviction Complaint?": unknown_occupants
     datatype: yesnoradio
+---
+template: unknown_occupants_help
+subject: |
+  **Where can I find this?**
+content: |  
+  The plaintiffs and defendants are usually listed near the top of a court form. If a form has a checkbox for unknown occupants, it will be by the list of defendants.
+  
+  [FILE uknown_occupants_image.png, 100%, Eviction complaint unknown occupants]
 ---
 # modified other opposing parties question
 # add to basic questions
@@ -539,7 +551,23 @@ question: |
 subquestion: |
   If you do not add your **{e-signature}**, you must sign your paper forms before you file and deliver them.
 
-  ${ collapse_template(signature_help) }  
+  <div class="alert alert-info ilao-info" role="alert">
+    <h6 class="alert-heading">What it means to sign your forms</h6>
+    <p>By signing your <i>Appearance</i>, you are certifying that:</p>
+    <p><ul>
+      <li>You read the document,</li>
+      <li>You believe it to be true and correct, and</li>
+      <li>You are not filing it for an improper purpose.</li>
+    </ul></p>
+    <p>See the <a href="https://ilcourtsaudio.blob.core.windows.net/antilles-resources/resources/9ce1fce9-895f-463e-b87d-f9b7631f8fde/Rule%20137.pdf"><b>Illinois Supreme Court Rule 137</b></a> for more information.</p>
+    <p>By signing your <i>Eviction Answer</i>, you are certifying that:</p>
+    <p><ul>
+      <li>Everything on the forms is true and correct, and</li>
+      <li>You understand that making a false statement on the form is perjury, which can result in criminal penalties.</li>
+    </ul></p>
+  <p>See the <a href="https://www.ilga.gov/legislation/ilcs/documents/073500050k1-109.htm"><b>Code of Civil Procedure, 735 ILCS 5/1-109</b></a> for more information.</p>
+  </div>
+
 fields:
   - "Add e-signature?": e_signature
     datatype: yesnoradio
@@ -576,7 +604,7 @@ subquestion: |
   
   You can respond to each claim one-by-one, or you can deny them all. Denying them all is called a general denial.
 
-  You are not required to file an Eviction Answer unless a judge orders you to. If you are filing any counterclaims, you must file a written Eviction Answer.
+  You are not required to file an Eviction Answer unless a judge orders you to. **Note:** If you are filing any affirmative defenses or counterclaims, you must file a written Eviction Answer.
 fields:
   - File a written Answer?: optional_answer
     datatype: yesnoradio
@@ -695,7 +723,7 @@ question: |
 subquestion: |
   Affirmative defenses are reasons why the Plaintiff should not win the case even if everything in the Eviction Complaint is true.
   
-  An affirmative defense is not that same as saying "I did nothing wrong." Instead, it is telling the court: "even if you think the landlord is right, I should win because I have this defense."
+  An affirmative defense is not the same as saying "I did nothing wrong." Instead, it is telling the court: "even if you think the landlord is right, I should win because I have this defense."
   
   **Note:** You will have to prove your affirmative defenses in court.
   
@@ -731,24 +759,29 @@ subquestion: |
   * You had a right to fix (cure) the violation, and
   * You did so within the required time period.
 
-  If this does not apply, you can leave this blank.
-
   **Note:** If you live in Chicago or Cook County, most tenants have a one-time right to stop an eviction for unpaid rent. This is called "pay and stay." You can cure by paying back rent and court costs before a judge signs an Eviction Order. If your building has six units or fewer, this only applies if your landlord does not live in the building.
 fields:
-  - Did you fix the lease violation in time?: cure_defense
+  - Does the lease or local law give you the right to fix the lease violation?: cure_defense
     input type: radio
     choices:
       - Yes: Yes
       - No: No
       - This does not apply to my case.: "Does not apply"
+  - Did you fix the lease violation in the required time period?: cure_fixed
+    input type: radio
+    choices:
+      - Yes: Yes
+      - No: No
+    show if:
+      variable: cure_defense
+      is: "Yes"
   - Additional details about how you fixed the lease violation: cure_defense_details
     input type: area
     rows: 5
     maxlength: 250
     required: False
-    show if:
-      variable: cure_defense
-      is: "Yes"
+    js show if: 
+      val("cure_defense") == "Yes" && val("cure_fixed") == "Yes"
 
 ---
 id: conditions intro
@@ -980,14 +1013,14 @@ id: other affirmative defense intro
 question: |
   Other affirmative defenses
 subquestion: |
-  % if notice_defense.any_true() or cure_defense == "Yes" or conditions_defense or retaliation_none == False or waiver_defense or rent_refusal_defense:
+  % if notice_defense.any_true() or (cure_defense == "Yes" and cure_fixed == "Yes") or conditions_defense or retaliation_none == False or waiver_defense or rent_refusal_defense:
   The following affirmative defenses will be included in your forms:
 
   % if notice_defense.any_true():
   * You received no written notice or an improper written notice before the landlord filed the eviction case.
   % endif
-  % if cure_defense == "Yes":
-  * You cured or fixed the lease violation within the allowed time period.
+  % if cure_defense == "Yes" and cure_fixed == "Yes":
+  * You fixed or "cured" the lease violation within the allowed time period.
   % endif
   % if conditions_defense:
   * Bad property conditions made the rental unit worth less than the rent you owe.
@@ -1145,7 +1178,29 @@ subquestion: |
   Since you did not want to file a written Answer, bring up an affirmative defense, or file any counterclaims, this program will only make an *Appearance* form.
   
   The *Appearance* tells the court and other parties that you are participating in the court case. It also tells the court if you want a jury along with the judge at trial.
+---
+id: answer required warning
+continue button field: answer_required
+question: |
+  Written *Eviction Answer* required
+subquestion: |
+  Since you have affirmative defenses or counterclaims, you will need to respond to the statements in the *Eviction Complaint*.
   
+  The next screens will ask how you want to respond.
+---
+# This code block checks if any affirmative defenses or counterclaims were raised. If so, then a written answer must be filed. This code will set optional_answer to True so that the user must give a general denial or respond to each claim individually.
+sets:
+  - eviction_answer_check
+code: |
+  if optional_answer:
+    eviction_answer_check = True
+  else:
+    if notice_defense.any_true() or (cure_defense == "Yes" and cure_fixed == "Yes") or conditions_defense or retaliation_none == False or waiver_defense or rent_refusal_defense or other_defense or has_additional_info or has_counterclaims:
+	    answer_required
+  	  optional_answer = True
+	    eviction_answer_check = True
+    else:
+      eviction_answer_check = True
 ---
 reconsider: True
 code: |
@@ -1260,7 +1315,7 @@ question: |
 subquestion: |
   ${ collapse_template(delivery_method_help) }  
 
-  For best results, complete the Proof of Delivery section and send the forms today.
+  For best results, complete the Proof of Delivery section and send the forms as soon as you file them.
 
   If you do not know this now, you can add it to the Proof of Delivery section of your forms later.
 field: x.knows_delivery_method
@@ -1296,7 +1351,7 @@ question: |
 subquestion: |  
   You may use US mail or a delivery company, or hand delivery if you or the other party **does not** have an email address.
 
-  For best results, complete the Proof of Delivery section and send the forms today.
+  For best results, complete the Proof of Delivery section and send the forms as soon as you file them.
 
   **Note:** If you do not know this now, be sure to add it to the Proof of Delivery section of your forms later.
 
@@ -1560,7 +1615,7 @@ code: |
   #  appearance_additional_3.enabled = True
   #  appearance_additional_blank.enabled = True
 
-  if notice_defense.any_true() or cure_defense == "Yes" or conditions_defense or retaliation_none == False or waiver_defense or rent_refusal_defense or other_defense or has_additional_info or has_counterclaims:
+  if notice_defense.any_true() or (cure_defense == "Yes" and cure_fixed == "Yes") or conditions_defense or retaliation_none == False or waiver_defense or rent_refusal_defense or other_defense or has_additional_info or has_counterclaims:
     eviction_answer.enabled = True
     if optional_answer:
       if general_denial == False:
@@ -2057,8 +2112,8 @@ attachment:
     - "improper_notice": ${ notice_defense["improper_notice"] }
     - "inadequate_notice": ${ notice_defense["inadequate_notice"] }
 	
-    - "cure_cb": ${ True if cure_defense == "Yes" else '' }
-    - "cure_details": ${ cure_defense_details if cure_defense == "Yes" else '' }
+    - "cure_cb": ${ True if cure_defense == "Yes" and cure_fixed == "Yes" else '' }
+    - "cure_details": ${ cure_defense_details if cure_defense == "Yes" and cure_fixed == "Yes" else '' }
 
     - "conditions_cb": ${ conditions_defense }
     - "conditions_detail_1": ${ conditions[0].name.text if conditions_defense else '' }
@@ -2417,13 +2472,18 @@ review:
       % endif
   - Edit: cure_defense
     button: |
-      **Did you fix the lease violation in time given by the lease or local law, also known as the "cure" defense?**
+      **Does the lease or local law give you the right to fix the lease violation?**
       ${ cure_defense }
+  - Edit: cure_fixed
+    button: |
+      **Did you fix the lease violation in the required time period?**
+      ${ cure_fixed }
+    show if: cure_defense == "Yes"      
   - Edit: cure_defense_details
     button: |
       **Cure defense details:**
       ${ cure_defense_details }
-    show if: cure_defense == "Yes"
+    show if: cure_defense == "Yes" and cure_fixed == "Yes"
   - Edit: conditions_defense
     button: |
       **Were there bad property conditions?**
@@ -2847,13 +2907,18 @@ review:
       % endif
   - Edit: cure_defense
     button: |
-      **Did you fix the lease violation in time given by the lease or local law, also known as the "cure" defense?**
+      **Does the lease or local law give you the right to fix the lease violation?**
       ${ cure_defense }
+  - Edit: cure_fixed
+    button: |
+      **Did you fix the lease violation in the required time period?**
+      ${ cure_fixed }
+    show if: cure_defense == "Yes"
   - Edit: cure_defense_details
     button: |
       **Cure defense details:**
       ${ cure_defense_details }
-    show if: cure_defense == "Yes"
+    show if: cure_defense == "Yes" and cure_fixed == "Yes"
   - Edit: conditions_defense
     button: |
       **Were there bad property conditions?**
