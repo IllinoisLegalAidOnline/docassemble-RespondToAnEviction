@@ -1393,7 +1393,7 @@ question: |
 subquestion: |  
   You may use US mail or a delivery company, or hand delivery if you or the other party **does not** have an email address.
 
-  For best results, complete the Proof of Delivery section and send the forms today.
+  For best results, complete the Proof of Delivery section and send the forms as soon as you file them.
 
   **Note:** If you do not know this now, be sure to add it to the Proof of Delivery section of your forms later.
 
@@ -1426,7 +1426,7 @@ question: |
   When will you send your ${ form_name } to ${ x.name.full(middle="full") }?
   % endif
 subquestion: |
-  For best results, complete the Proof of Delivery section and send the forms today.
+  For best results, complete the Proof of Delivery section and send the forms as soon as you file them.
 
   **Note:** If you do not know this now, be sure to add it to the Proof of Delivery section of your forms later.
 fields:
@@ -2687,9 +2687,9 @@ review:
   - Edit: x.address.address
     button: |
       % if x.is_represented == True:
-      **${ x.lawyer.name.full(middle="full") }'s address: **
+      **${ x.lawyer.name.full(middle="full") }'s address:** 
       % else:
-      **${ x.name.full(middle="full") }'s address: **
+      **${ x.name.full(middle="full") }'s address:** 
       % endif
       ${ x.address.on_one_line(bare=True) }
   - Edit: x.knows_delivery_method
