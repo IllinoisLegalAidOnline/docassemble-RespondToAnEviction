@@ -51,6 +51,7 @@ mandatory: True
 code: |
   nav.set_section('section_intro')
   sees_nav_bar
+  snapshot_start
   how_to_use
   set_progress(5)
   eviction_options
@@ -143,8 +144,31 @@ code: |
   
   refresh_delivery_bundle
   refresh_answer_delivery_bundle
+  snapshot_forms
   get_docs_screen
+---
+code: |
+  stuff_to_snapshot = {
+  	'start_time': str(current_datetime().format_datetime()),
+  	'started_interview': True, 
+  	}
+    
+  stuff_to_snapshot['zip'] = showifdef('users[0].address.zip')
 
+  stuff_to_snapshot['downloaded_forms'] = showifdef('refresh_delivery_bundle')
+  
+  store_variables_snapshot(
+  	data=stuff_to_snapshot, persistent=True
+  	)
+  snapshot_interview_state = True
+---
+code: |
+  snapshot_interview_state
+  snapshot_start = True  
+---
+code: |
+  reconsider('snapshot_interview_state')
+  snapshot_forms = True
 ---
 id: welcome
 question: |
@@ -243,22 +267,22 @@ id: ask if eviction case
 question: |
   Are you responding to a residential eviction lawsuit?
 subquestion: |
-  A residential eviction is a case where a landlord is suing to evict tenants.
+  A residential eviction is a case where a landlord is suing to evict tenants from the property where they live. The property can include dwellings such as an apartment, a house, or a mobile home.
 
   ${ collapse_template(other_evictions_help) }
   
   **Note:** Receiving a **{Notice of Termination}** from your landlord is not the same as being evicted in a lawsuit. If you received an **{Eviction Complaint}** and a **{Summons}** from the sheriff, you were likely sued in court.
 
 fields:
-  - no label: eviction_case
+  - Responding to a residential eviction?: eviction_case
     datatype: yesnoradio
 terms:
   - Notice of Termination: |
       A notice to a tenant that their lease is ending. A lease can be terminated for different reasons. For example:
       
-      * the tenant did not pay rent,
-      * the tenant violated a term of the lease, or
-      * the landlord does not want to renew the lease at the end of the lease period.
+      * the tenant did not pay rent, sometimes called a 5-day notice,
+      * the tenant violated a term of the lease, sometimes called a 10-day notice, or
+      * the landlord does not want to renew the lease at the end of the lease period, sometimes called a 30-day notice.
   - Eviction Complaint: |
       A court document used by a landlord to ask the court to evict the tenant.
   - Summons: |
@@ -372,6 +396,8 @@ question: |
   Are "Unknown Occupants" listed as defendants on your Eviction Complaint?
 subquestion: |
   Answer **Yes** if they were listed on the Eviction Complaint. They could be listed as defendants or there might be a checkbox.
+  
+  **Note:** If "Unknown Occupants" are listed on the Eviction Complaint, it doesn't mean the landlord is accusing you of having an unauthorized guest. If the court enters an Eviction Order with "Unknown Occupants" on it, the sheriff can make everyone leave the property even if they are not listed by name in the lease.
 
   ${collapse_template(unknown_occupants_help)}
 fields:
@@ -725,7 +751,9 @@ subquestion: |
   
   An affirmative defense is not the same as saying "I did nothing wrong." Instead, it is telling the court: "even if you think the landlord is right, I should win because I have this defense."
   
-  **Note:** You will have to prove your affirmative defenses in court.
+  **Note:** You will have to prove your affirmative defenses in court with evidence such as documents.
+  
+  You can bring up affirmative defenses even if you deny everything in the Eviction Complaint.
   
   This program will explain the most common affirmative defenses. To learn more, read ILAO's article about [**common eviction defenses**](https://www.illinoislegalaid.org/node/31006).
 ---
@@ -792,7 +820,7 @@ subquestion: |
   
   Even if the value of the property has been reduced a little by the bad property conditions, this could mean that you owe the landlord less money in unpaid rent. If you do not pay the landlord the full amount you owe, you may be evicted.
   
-  Examples of bad property conditions include: water leaking into the apartment, kitchen appliances that don't work, bug or rodent infestations.
+  Examples of bad property conditions include: water or sewage leaking into the apartment, major appliances like the furnace not working, or bug or rodent infestations.
 fields:
   Were there bad property conditions?: conditions_defense
   datatype: yesnoradio
@@ -805,7 +833,7 @@ subquestion: |
 
   The forms have space for up to 16 different property conditions. List each one separately like "bedbugs" or "the front door to my unit does not lock." Be specific about what the problem is and what rooms it is in. There isn't much space on the forms for details, but you can explain more in court.
   
-  You will need to show proof of the bad property conditions to the judge.
+  You will need to show proof of the bad property conditions and that the landlord knew about the conditions to the judge.
 
 fields:
   - Serious problems that the landlord knew about: conditions[i].name.text
@@ -858,7 +886,7 @@ subquestion: |
 
   about the property to an appropriate organization, and the landlord is evicting you for complaining.
 
-  State law only protects you from being evicted if you complain to someone in government about your landlord or unit.
+  State law only protects you from being evicted if you complain to someone in government about your landlord or unit. If you live in a mobile home, this includes contacting someone in the Attorney General's office or a lawyer. 
 
   Chicago, Cook County, and other local jurisdictions may have extra protections for some renters.
 
@@ -1116,9 +1144,9 @@ question: |
 subquestion: |
   Illinois law limits what kinds of counterclaims you can raise. They generally must address the right to possession.
 
-  If the judge dismisses your counterclaim because it is not directly related to the eviction, you may have to file an additional lawsuit. To make sure you can do this, ask the judge to dismiss your counterclaim without prejudice.
+  If the judge dismisses your counterclaim because it is not directly related to the eviction, you may have to file a separate lawsuit. To make sure you can do this, ask the judge to dismiss your counterclaim without prejudice.
   
-  Counterclaims are like a new lawsuit against your landlord. There will likely be fees to file your counterclaims. 
+  A counterclaim is like a new lawsuit against your landlord. There will likely be fees to file your counterclaims. 
 ---
 id: any counterclaims
 question: |
