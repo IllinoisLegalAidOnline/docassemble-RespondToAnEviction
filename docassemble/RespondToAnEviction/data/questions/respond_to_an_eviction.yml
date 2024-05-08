@@ -267,7 +267,7 @@ id: ask if eviction case
 question: |
   Are you responding to a residential eviction lawsuit?
 subquestion: |
-  A residential eviction is a case where a landlord is suing to evict tenants from the property where they live. The property can include dwellings such as an apartment, a house, or a mobile home.
+  A residential eviction is a case where a landlord is suing to evict tenants from the property where they live. The property can include dwellings such as an apartment, a unit, or a house.
 
   ${ collapse_template(other_evictions_help) }
   
@@ -293,7 +293,7 @@ event: not_eviction_kickout
 question: |
   Sorry
 subquestion: |
-  The forms made by this program are only for residential evictions. They cannot be used in other kinds of lawsuits or in these types of evictions:
+  The forms made by this program are only for certain types of residential evictions. They cannot be used in other kinds of lawsuits or in these types of evictions:
   
   * Commercial,
   * Mobile homes,
@@ -317,6 +317,8 @@ content: |
   * Mobile homes,
   * Condominium owners being sued by the association, or
   * Contracts for deed (also called rent to own agreements or installment sales agreements).
+  
+  Different laws apply to these types of evictions.
 ---
 
 id: rental property address
@@ -493,7 +495,7 @@ question: |
 subquestion: |
   This program will make an *Appearance* you can file with the court. Whether or not you have filed a written *Appearance* before your court date, you still must go to court to tell the judge that you want to be a part of the case.
 
-  You have the right to a jury trial. If you want a jury trial, make sure you select that option in this program. This will check the appropriate box on the Appearance form. If you don't check that box, or if you don't file your Appearance before the court date and time on your Eviction Summons, you may lose the right to a jury trial.
+  You have the right to a jury trial. If you want a jury trial, make sure you select that option in this program. This will check the appropriate box on the *Appearance* form. If you don't check that box, or if you don't file your *Appearance* before the court date and time on your Eviction Summons, you may lose the right to a jury trial.
 
   If you haven't requested a jury by the first court date, the judge may give you additional time to do so if you ask, but there is no guarantee you will get extra time.
   
@@ -833,7 +835,7 @@ subquestion: |
 
   The forms have space for up to 16 different property conditions. List each one separately like "bedbugs" or "the front door to my unit does not lock." Be specific about what the problem is and what rooms it is in. There isn't much space on the forms for details, but you can explain more in court.
   
-  You will need to show proof of the bad property conditions and that the landlord knew about the conditions to the judge.
+  **Note:** You will need to show proof of the bad property conditions and that the landlord knew about the conditions to the judge.
 
 fields:
   - Serious problems that the landlord knew about: conditions[i].name.text
@@ -880,13 +882,13 @@ question: |
 subquestion: |
   You may have a defense of retaliation if you believe the landlord filed the eviction in retaliation for something you did. This means you complained about:
 
-  * a housing condition,
-  * a health violation, or
-  * another violation
+  * A housing condition,
+  * A health violation, or
+  * Another violation
 
   about the property to an appropriate organization, and the landlord is evicting you for complaining.
 
-  State law only protects you from being evicted if you complain to someone in government about your landlord or unit. If you live in a mobile home, this includes contacting someone in the Attorney General's office or a lawyer. 
+  State law only protects you from being evicted if you complain to someone in government about your landlord or unit.
 
   Chicago, Cook County, and other local jurisdictions may have extra protections for some renters.
 
@@ -1142,11 +1144,23 @@ continue button field: counterclaims_intro
 question: |
   Counterclaims
 subquestion: |
-  Illinois law limits what kinds of counterclaims you can raise. They generally must address the right to possession.
+  Illinois law limits what kinds of counterclaims you can raise. They must address the right to possession or be directly related to the eviction.
 
-  If the judge dismisses your counterclaim because it is not directly related to the eviction, you may have to file a separate lawsuit. To make sure you can do this, ask the judge to dismiss your counterclaim without prejudice.
-  
   A counterclaim is like a new lawsuit against your landlord. There will likely be fees to file your counterclaims. 
+
+  ${ collapse_template(counterclaim_example) }
+
+  If the judge dismisses your counterclaim because it is not directly related to the eviction, you may have to file a separate lawsuit. To make sure you can do this, ask the judge to dismiss your counterclaim without prejudice.  
+---
+template: counterclaim_example
+subject: |
+  **Can I see an example of a counterclaim?**
+content: |
+  Let's say you are being evicted for nonpayment of rent, but your landlord has refused to repair your apartment. If you think you paid more rent than what the apartment is worth, you may have a counterclaim. As a counterclaim, you could ask that the landlord:
+  
+  * Make repairs,
+  * Pay you the difference between what you paid in rent and what the apartment is worth, or
+  * Charge less for future rent payments.
 ---
 id: any counterclaims
 question: |
@@ -1154,7 +1168,10 @@ question: |
 subquestion: |
   You will have to state facts to explain what you are claiming. You will have to prove these facts at trial.
   
-  As part of your counterclaims, you will have to explain why the law requires that the landlord pays you money damages and what other relief.
+  As part of your counterclaims, you will have to explain why the law requires that the landlord:
+  
+  * Pays you money damages, and
+  * Does what other relief you ask for.
 fields:
   Any counterclaims?: has_counterclaims
   datatype: yesnoradio  
@@ -1171,7 +1188,7 @@ fields:
     input type: area
     rows: 10
     maxlength: 500
-  - List what the landlord should pay you and other relief:: claims[i].details
+  - List what the landlord should pay you and what else the law requires them to do:: claims[i].details
     input type: area
     rows: 6
     maxlength: 275
