@@ -1,7 +1,7 @@
 metadata:
   title: Respond to an eviction
   short title: Respond to an eviction
-  comment: This program helps you respond to an eviction by telling the court and the other parties that you are participating in a court case. It also helps you make an Eviction Answer, Affirmative Defenses, and Counterclaims form that tells how you respond to what is written in the complaint.
+  comment: This program helps you respond to an eviction by telling the court and the other parties that you are participating in a court case. It also helps you make an Eviction Answer, Defenses, and Counterclaims form that tells how you respond to what is written in the complaint.
   authors:
     - Matt Newsted
 ---
@@ -135,8 +135,8 @@ code: |
   nav.set_section('section_about_you')
   users[0].address.address
   users[0].phone_number
-  if users[0].email_notice == True:
-    users[0].email
+  #if users[0].email_notice == True:
+  #  users[0].email
   e_signature
 
   set_progress(100)
@@ -144,6 +144,7 @@ code: |
   
   refresh_delivery_bundle
   refresh_answer_delivery_bundle
+  forms_assembling
   snapshot_forms
   get_docs_screen
 ---
@@ -155,7 +156,7 @@ code: |
     
   stuff_to_snapshot['zip'] = showifdef('users[0].address.zip')
 
-  stuff_to_snapshot['downloaded_forms'] = showifdef('refresh_delivery_bundle')
+  stuff_to_snapshot['downloaded_forms'] = showifdef('forms_assembling')
   
   store_variables_snapshot(
   	data=stuff_to_snapshot, persistent=True
@@ -176,7 +177,7 @@ question: |
 subquestion: |
   Welcome to Illinois Legal Aid Online's **Respond to an eviction** Easy Form.
 
-  This program helps you respond to an eviction by telling the court and the other parties that you are participating in the court case. It also helps you make an *Eviction Answer, Affirmative Defenses, and Counterclaims* form that tells how you respond to what is written in the complaint.
+  This program helps you respond to an eviction by telling the court and the other parties that you are participating in the court case. It also helps you make an *Eviction Answer, Defenses, and Counterclaims* form that tells how you respond to what is written in the complaint.
   
   To learn more, read ILAO's article about [**understanding an eviction**](https://www.illinoislegalaid.org/node/31071).
 field: sees_nav_bar
@@ -219,6 +220,8 @@ subquestion: |
   * If you live in Cook County, Cook County Legal Aid for Housing and Debt (CCLAHD) can help resolve housing problems. Visit the [**CCLAHD website**](https://www.cookcountylegalaid.org/) or call 855-956-5763.
   * You can **represent yourself**. If you don't hire a lawyer, there is paperwork you can file to get into the case and defend yourself. **Note:** You can also just go to court without filing any paperwork. Representing yourself is called appearing "pro se."
   * You can **do nothing**. If you ignore the lawsuit, you will probably be evicted and a judgment for money may be entered against you.
+  
+  Use [**Get Legal Help**](https://www.illinoislegalaid.org/get-legal-help) to find free or low-cost legal services in your area.
 ---
 id: eviction forms
 continue button field: eviction_forms
@@ -300,7 +303,7 @@ subquestion: |
   * Condominium owners being sued by the association, or
   * Contracts for deed (also called rent to own agreements or installment sales agreements).
   
-  To respond to a different kind of lawsuit, use ILAO's [**Respond to a lawsuit Easy Form**](https://www.illinoislegalaid.org/legal-information/respond-to-a-lawsuit).
+  To respond to a different kind of lawsuit, use ILAO's [**Respond to a lawsuit Easy Form**](https://www.illinoislegalaid.org/legal-information/respond-lawsuit).
 
   Click **Back** if you made a mistake. Or you can talk with a lawyer to discuss your options. Use **[Get Legal Help](https://www.illinoislegalaid.org/get-legal-help)** to find free or low-cost legal services in your area.
 buttons:
@@ -540,38 +543,79 @@ subquestion: |
   If you are e-filing your forms, you may need to e-file the *Appearance* form as two separate documents: once as an Appearance and once as a Jury Demand.
   
   Check with [**Illinois Court Help**](https://ilcourthelp.gov) or call (833) 411-1121. You can also ask your local circuit clerk.
- 
 ---
-id: phone number
+#id: phone number
+#question: |
+#  What is your phone number?
+#subquestion: |
+#  If you do not want to list your phone number on your form, leave this blank.
+#fields:
+#  - Phone: users[0].phone_number
+#    datatype: al_international_phone
+#    required: False
+#---
+#id: notice by email
+#question: |
+#  Do you have an email address?
+#subquestion: |
+#  If you have an email address, you must list it so the court and other parties can contact you about this case.
+#fields:
+#  - "Email?": users[0].email_notice
+#    datatype: yesnoradio
+#---
+#id: email address
+#question: |
+#  What email address do you want to list on your court forms?
+#subquestion: |
+#  If you do not want to enter your personal email address, you can create a new email account to get email about your case.
+#  
+#  Be sure to check this email daily, otherwise you may miss important information about your case.
+#fields:
+#  - Email address: users[0].email    
+#    datatype: email
+#    #required: False
+---
+id: your contact information
 question: |
-  What is your phone number?
+  What is your contact information?
 subquestion: |
-  If you do not want to list your phone number on your form, leave this blank.
-fields:
-  - Phone: users[0].phone_number
+  The court or other parties might need to contact you about this case.
+
+  **This information will appear on your court forms.**
+  
+  If you do not want to list a phone number on your forms, leave it blank.
+
+  If you have an email address, you must list it. Be sure to check your email daily, otherwise you may miss important information about your case.
+
+  ${ collapse_template(contact_info_help) }  
+fields:  
+  - Phone number: users[0].phone_number
     datatype: al_international_phone
     required: False
----
-id: notice by email
-question: |
-  Do you have an email address?
-subquestion: |
-  If you have an email address, you must list it so the court and other parties can contact you about this case.
-fields:
-  - "Email?": users[0].email_notice
+  - Do you have an email address?: users[0].email_notice      
     datatype: yesnoradio
----
-id: email address
-question: |
-  What email address do you want to list on your court forms?
-subquestion: |
-  If you do not want to enter your personal email address, you can create a new email account to get email about your case.
-  
-  Be sure to check this email daily, otherwise you may miss important information about your case.
-fields:
+  - note: |
+      This email address will appear on your court forms. Be sure to check 
+      this email daily, otherwise you may miss important information about 
+      your case.
+    show if: users[0].email_notice      
   - Email address: users[0].email    
     datatype: email
-    #required: False
+    show if: 
+      variable: users[0].email_notice
+      is: True
+---
+template: contact_info_help
+subject: |
+  **What if I don't want to list my email address?**
+content: |  
+  If you do not want to enter your personal email address, you can create a new email account to get email about your case.
+  
+  To make a new email account try one of these email services:
+  
+  * [**Gmail**](https://accounts.google.com/SignUp)
+  * [**Outlook**](https://outlook.live.com/owa/?nlp=1&signup=1)
+  * [**Yahoo**](https://login.yahoo.com/account/create?.lang=en-US&.intl=us)
 ---
 id: e-signature
 question: |
@@ -632,7 +676,9 @@ subquestion: |
   
   You can respond to each claim one-by-one, or you can deny them all. Denying them all is called a general denial.
 
-  You are not required to file an Eviction Answer unless a judge orders you to. **Note:** If you are filing any affirmative defenses or counterclaims, you must file a written Eviction Answer.
+  You are not required to file an Eviction Answer unless a judge orders you to.
+  
+  **Note:** If you are filing any affirmative defenses or counterclaims, you must file a written Eviction Answer.
 fields:
   - File a written Answer?: optional_answer
     datatype: yesnoradio
@@ -911,7 +957,7 @@ fields:
     datatype: yesnowide
     required: False
   - Town or county ordinance where the property is located: retaliation_ordinance
-    maxlength: 25
+    maxlength: 30
     show if:
       variable: retaliation_local
       is: True
@@ -1083,7 +1129,7 @@ question: |
 subquestion: |
   Enter details about your affirmative defense.
 fields:
-  - Short name or description of the affirmtaive defense: defenses[i].name.text
+  - Short name or description of the affirmative defense: defenses[i].name.text
     maxlength: 60
   - Facts that support your defense:: defenses[i].details
     input type: area
@@ -1236,6 +1282,17 @@ subquestion: |
 # This code block checks if any affirmative defenses or counterclaims were raised. If so, then a written answer must be filed. This code will set optional_answer to True so that the user must give a general denial or respond to each claim individually.
 sets:
   - eviction_answer_check
+depends on:
+  - notice_defense
+  - cure_defense
+  - cure_fixed
+  - conditions_defense
+  - retaliation_none
+  - waiver_defense
+  - rent_refusal_defense
+  - other_defense
+  - has_additional_info
+  - has_counterclaims
 code: |
   if optional_answer:
     eviction_answer_check = True
@@ -1507,7 +1564,17 @@ subquestion: |
 
   * If a party in your case does not have a lawyer, you can hand-deliver the forms to them or to a family member who is 13 or older at their home.
   * If they do have a lawyer, you can hand-deliver the forms to the lawyer or to the lawyer's office.
-
+---
+id: forms assembling
+continue button field: forms_assembling
+question: |
+  Almost done
+subquestion: |
+  After you click **Next**, it may take a few moments to finish making your forms.
+  
+  ###### You do not need to refresh your screen. Hang in there!
+  
+  [NEWLINE]
 ---
 id: get docs screen
 event: get_docs_screen
@@ -1660,7 +1727,7 @@ code: |
   #  appearance_additional_3.enabled = True
   #  appearance_additional_blank.enabled = True
 
-  if notice_defense.any_true() or (cure_defense == "Yes" and cure_fixed == "Yes") or conditions_defense or retaliation_none == False or waiver_defense or rent_refusal_defense or other_defense or has_additional_info or has_counterclaims:
+  if optional_answer or notice_defense.any_true() or (cure_defense == "Yes" and cure_fixed == "Yes") or conditions_defense or retaliation_none == False or waiver_defense or rent_refusal_defense or other_defense or has_additional_info or has_counterclaims:
     eviction_answer.enabled = True
     if optional_answer:
       if general_denial == False:
@@ -1687,7 +1754,7 @@ objects:
 ---
 objects:
   - appearance_single_pdf_bundle: ALDocumentBundle.using(elements=[appearance_attachment, additional_delivery_bundle], filename="appearance.pdf", title="Appearance", enabled=True)
-  - answer_bundle: ALDocumentBundle.using(elements=[eviction_answer, additional_answer, additional_conditions, additional_defenses_counterclaims, answer_additional_delivery_bundle], filename="eviction_answer.pdf", title="Eviction Answer", enabled=True)
+  - answer_bundle: ALDocumentBundle.using(elements=[eviction_answer, additional_answer, additional_conditions, additional_defenses_counterclaims, answer_additional_delivery_bundle], filename="eviction_answer.pdf", title="Eviction Answer, Defenses, and Counterclaims", enabled=True)
 ---
 attachment:
   variable name: instructions[i]
@@ -2442,6 +2509,8 @@ question: |
   Review screen
 subquestion: |
   Edit your answers below.
+
+  **Note:** If you are filing any affirmative defenses or counterclaims, you must file a written Eviction Answer.
 review: 
   - Edit: rental_property.address
     button: |
@@ -2488,6 +2557,7 @@ review:
     button: |
       **Do you want to deny all claims in the *Eviction Complaint*?**
       ${ word(yesno(general_denial)) }      
+    show if: optional_answer == True
   - Edit: answer_responses.revisit
     button: |
       **Your responses: (Edit to change paragaph, subparagraph, and response)**
@@ -2495,7 +2565,7 @@ review:
       % for paragraph in answer_responses:
         * ${ paragraph.para + paragraph.sub + " (" + paragraph.response + ")"}
       % endfor
-    show if: general_denial == False
+    show if: optional_answer == True and general_denial == False
   - Edit: notice_defense
     button: |
       **Problems with the notice:**
@@ -2905,6 +2975,8 @@ question: |
   Responses
 subquestion: |
   Edit your answers below.
+  
+  **Note:** If you are filing any affirmative defenses or counterclaims, you must file a written Eviction Answer.
 review:
   - Edit: optional_answer
     button: |
@@ -2914,6 +2986,7 @@ review:
     button: |
       **Do you want to deny all claims in the *Eviction Complaint*?**
       ${ word(yesno(general_denial)) }      
+    show if: optional_answer == True
   - Edit: answer_responses.revisit
     button: |
       **Your responses: (Edit to change paragaph, subparagraph, and response)**
@@ -2921,7 +2994,7 @@ review:
       % for paragraph in answer_responses:
         * ${ paragraph.para + paragraph.sub + " (" + paragraph.response + ")"}
       % endfor
-    show if: general_denial == False
+    show if: optional_answer == True and general_denial == False
 ---
 id: affirmative defenses section review screen
 event: section_defenses
@@ -2930,6 +3003,8 @@ question: |
   Affirmative defenses
 subquestion: |
   Edit your answers below.
+
+  **Note:** If you are filing any affirmative defenses or counterclaims, you must file a written Eviction Answer.
 review:
   - Edit: notice_defense
     button: |
@@ -3186,6 +3261,8 @@ question: |
   Counterclaims
 subquestion: |
   Edit your answers below.
+  
+  **Note:** If you are filing any affirmative defenses or counterclaims, you must file a written Eviction Answer.  
 review:
   - Edit: has_counterclaims
     button: |
