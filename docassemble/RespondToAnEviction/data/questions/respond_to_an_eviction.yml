@@ -63,7 +63,6 @@ code: |
   set_progress(15)
   nav.set_section('section_case_info')
   appearance_info
-  #user_ask_role
   if rental_property.state != "IL":
     not_illinois_property
   users.gather()
@@ -72,7 +71,6 @@ code: |
   other_parties.gather()
   set_progress(30)
   filing_county
-  #trial_court_index
   if trial_court_index == -1:
     cclahd_info
   case_number
@@ -91,7 +89,6 @@ code: |
   set_progress(40)
   nav.set_section('section_defenses')
   defenses_intro
-  #defenses
   notice_defense
   cure_defense
   if conditions_defense:
@@ -116,10 +113,6 @@ code: |
   set_progress(75)
   nav.set_section('section_delivery')
   delivery_intro
-  #if delivery_parties.number() > 8:    OLD before list comprehension
-  #  extra_delivery_forms     OLD before list comprehension
-  set_progress(75)
-  #for person in delivery_parties[:8]:    OLD before list comprehension
   for person in delivery_parties:
     if person.is_represented:
       person.lawyer.name.first
@@ -134,8 +127,6 @@ code: |
   nav.set_section('section_about_you')
   users[0].address.address
   users[0].phone_number
-  #if users[0].email_notice == True:
-  #  users[0].email
   e_signature
 
   set_progress(100)
@@ -664,12 +655,16 @@ subquestion: |
   
   You can respond to each claim one-by-one, or you can deny them all. Denying them all is called a general denial.
 
-  You are not required to file an Eviction Answer unless a judge orders you to.
+  You are not required to file a written Eviction Answer unless a judge orders you.
+
+  <div class="alert alert-info ilao-info" role="alert">
+    <p><b>Note:</b> If you are filing any affirmative defenses or counterclaims, <b>you must file a written Eviction Answer</b>.</p>
+  </div>
   
-  **Note:** If you are filing any affirmative defenses or counterclaims, **you must file a written Eviction Answer**.
 fields:
   - File a written Answer?: optional_answer
     datatype: yesnoradio
+    default: ${ showifdef('answer_required') }
 ---
 id: general denial
 question: |
@@ -805,7 +800,6 @@ subquestion: |
 fields:
   - Notice problems: notice_defense
     datatype: checkboxes
-    #none of the above: False
     choices:
       - __No Notice__ - The landlord says that I did not pay my rent or that I otherwise violated my lease, but I did not get a written notice from the landlord.: no_notice
       - __Improper service of Notice__ - The landlord did not give me notice in a lawful way.: improper_service
@@ -1266,22 +1260,14 @@ subquestion: |
   Since you have affirmative defenses or counterclaims, you will need to respond to the statements in the *Eviction Complaint*.
   
   The next screens will ask how you want to respond.
+  
+  **Note:** When asked if you want to file a written answer, you will need to select **Yes**. If you want to remove affirmative defenses or counterclaims, you can make changes by clicking the [**Affirmative defenses**](${ url_action('section_defenses') }) or [**Counterclaims (optional)**](${ url_action('section_counterclaims') }) sections.
+  
 ---
 reconsider: True
 code: |
   delivery_parties = DAList("delivery_parties", elements = other_parties + users[1:])
 # changed order to keep it a DAList
----
-#id: extra delivery forms required
-#continue button field: extra_delivery_forms
-#question: |
-#  Additional Proof of Delivery
-#subquestion: |
-#  This program makes the Proof of Delivery forms for up to 8 other parties.
-#  
-#  You will need to fill out *Additional Proof of Delivery* forms for ${comma_and_list(delivery_parties[8:])}. 
-#  
-#  You can download blank *Additional Proof of Delivery* forms at the end of this program.
 ---
 id: delivery intro
 continue button field: delivery_intro
@@ -1727,6 +1713,8 @@ attachment:
       - "judge_trial": ${ trial_with == "judge only" }
       - "six_person_jury_trial": ${ trial_with == "judge and six-person jury" }
       - "twelve_person_jury_trial": ${ trial_with == "judge and twelve-person jury" }
+      - "e_sign_name__1": ${ users[0].name.full(middle="full") if e_signature else '' }
+      - "e_sign_name__2": ${ users[0].name.full(middle="full") if e_signature else '' }
 
       - "delivery_party1_name_full": | 
           % if delivery_parties[0].is_represented:
@@ -2519,7 +2507,6 @@ review:
       **Do you want to add your e-signature to your forms?**
       ${ word(yesno(e_signature)) }
 ---
-#needs: yes_no_unknown
 id: delivery party review
 continue button field: x.review_delivery
 generic object: ALIndividual
@@ -2947,26 +2934,6 @@ columns:
 delete buttons: True
 confirm: True
 ---
-#id: conditions edit
-#ontinue button field: x.review_conditions_details
-#eneric object: DAObject
-#uestion: |
-# Edit conditions
-#eview: 
-# - Edit: x.name.text
-#   button: |
-#     **Problem:**
-#     ${ x.name.text  }
-# - Edit: x.date_started
-#   button: |
-#     **Date problem started:**
-#     ${ x.date_started } 
-# - Edit: x.date_fixed
-#   button: |
-#     **Date fixed, if any:**
-#     ${ x.date_fixed }
-#ontinue button label: Next
----
 id: defenses revisit
 continue button field: defenses.revisit
 question: |
@@ -2987,22 +2954,6 @@ columns:
       action_button_html(url_action(row_item.attr_name("name.text")), label="Edit", icon="pencil-alt")
 delete buttons: True
 confirm: True
----
-#id: defenses edit
-#continue button field: x.review_defenses_details
-#generic object: DAObject
-#question: |
-#  Edit affirmative defenses
-#review: 
-#  - Edit: x.name.text
-#    button: |
-#      **Short name or description of defense:**
-#      ${ x.name.text  }
-#  - Edit: x.date_started
-#    button: |
-#      **Facts that support your defense:**
-#      ${ x.details } 
-#continue button label: Next
 ---
 id: counterclaims section review screen
 event: section_counterclaims
