@@ -144,6 +144,11 @@ code: |
   	'started_interview': True, 
   	}
     
+  try:
+    stuff_to_snapshot['ip_address'] = device(ip=True)
+  except:
+    pass
+
   stuff_to_snapshot['zip'] = showifdef('users[0].address.zip')
 
   stuff_to_snapshot['downloaded_forms'] = showifdef('forms_assembling')
@@ -2507,8 +2512,9 @@ review:
       **Do you want to add your e-signature to your forms?**
       ${ word(yesno(e_signature)) }
 ---
-id: delivery party review
+id: delivery party review screen
 continue button field: x.review_delivery
+section: Delivery details
 generic object: ALIndividual
 question: |
   Edit ${ x.name.full(middle="full") }'s information
@@ -2575,8 +2581,9 @@ review:
       % endif
     show if: x.knows_delivery_method
 ---
-id: users review
+id: users review screen
 continue button field: users.revisit
+section: Case info
 question: |
   Edit the ${ user_ask_role }s
 subquestion: |
@@ -2594,7 +2601,8 @@ columns:
 delete buttons: True
 confirm: True
 ---
-id: other parties review
+id: other parties review screen
+section: Case info
 continue button field: other_parties.revisit
 question: |
   % if user_ask_role == "plaintiff":
@@ -2617,8 +2625,9 @@ columns:
 delete buttons: True
 confirm: True
 ---
-id: answers review
+id: answers review screen
 continue button field: answer_responses.revisit
+section: Responses
 question: |
   Edit your responses
 subquestion: |
@@ -2640,7 +2649,8 @@ columns:
 delete buttons: True
 confirm: True
 ---
-id: answer response review
+id: answer response review screen
+section: Responses
 continue button field: x.review_responses
 generic object: DAObject
 question: |
@@ -2913,8 +2923,9 @@ review:
       % endif
 
 ---
-id: conditions revisit
+id: conditions revisit review screen
 continue button field: conditions.revisit
+section: Affirmative defenses
 question: |
   Edit the bad property conditions
 subquestion: |
@@ -2934,8 +2945,9 @@ columns:
 delete buttons: True
 confirm: True
 ---
-id: defenses revisit
+id: defenses revisit review screen
 continue button field: defenses.revisit
+section: Affirmative defenses
 question: |
   Edit the affirmative defenses
 subquestion: |
@@ -2979,7 +2991,8 @@ review:
     show if: has_counterclaims
 
 ---
-id: counterclaims revisit
+id: counterclaims revisit review screen
+section: Counterclaims (optional)
 continue button field: claims.revisit
 question: |
   Edit the counterclaims
