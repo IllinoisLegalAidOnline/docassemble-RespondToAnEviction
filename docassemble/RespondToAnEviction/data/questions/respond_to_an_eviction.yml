@@ -370,6 +370,18 @@ subject: |
 content: |  
     You said you are being sued in an eviction, so you are the **Defendant.** The other people on your side of the case would be co-defendants.
 ---
+id: user name
+sets:
+    - users[0].name.first
+    - users[0].name.last
+    - users[0].name.middle
+    - users[0].name.suffix
+question:  |
+  What is your name?
+fields:
+  - code: |
+      users[0].name_fields()
+---
 depends on:
   - user_started_case
 sets:
@@ -1216,15 +1228,21 @@ subquestion: |
   Enter details about your counterclaim.
   
   The forms have space for up to 5 separate counterclaims.
+  
+  **Note:** If your counterclaims do not fit in these spaces, you can put your counterclaims in a separate document and file it with your other forms. There will likely be fees to file your counterclaims.
 fields:
   - State what you are claiming and the facts that support your claims:: claims[i].name.text
     input type: area
     rows: 10
     maxlength: 500
+    help: |
+      The form has limited space. You can fit more words if you don't break lines with the Enter or Return key. 
   - List what the landlord should pay you and what else the law requires them to do:: claims[i].details
     input type: area
     rows: 6
     maxlength: 275
+    help: |
+      The form has limited space. You can fit more words if you don't break lines with the Enter or Return key. 
 ---
 id: any other counterclaims
 question: |
@@ -1489,7 +1507,6 @@ fields:
   - Date: x.delivery_date
     datatype: date
     required: False
-    min: ${ today().format("yyyy-MM-dd") }
     max: ${ today().plus(years=1) }
   - Time: x.delivery_time
     datatype: time
@@ -1557,7 +1574,7 @@ under: |
   % endif 
 
   [NEWLINE]
-  ${ action_button_html(interview_url(i="docassemble.ILAO:feedback.yml", easy_form_interview=ilao_easy_form_url, easy_form_title=ilao_easy_form_title, easy_form_page=user_info().question_id, easy_form_variable=user_info().variable, local=False,reset=1), label=':comment: Was this program helpful?', color="#181c36", size="md", new_window=True) }
+  ${ action_button_html(interview_url(i="docassemble.ILAO:feedback.yml", easy_form_interview=ilao_easy_form_url, easy_form_title=ilao_easy_form_title, easy_form_page=current_context().question_id, easy_form_variable=current_context().variable, local=False,reset=1), label=':comment: Was this program helpful?', color="#181c36", size="md", new_window=True) }
 ---
 generic object: ALDocumentBundle
 template: x.send_email_template
