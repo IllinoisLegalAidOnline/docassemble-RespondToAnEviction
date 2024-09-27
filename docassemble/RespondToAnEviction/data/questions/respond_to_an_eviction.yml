@@ -13,12 +13,14 @@ include:
 objects:
   - users: ALPeopleList.using(there_are_any=True)
   - users[i].lawyer: ALIndividual
-  - rental_property: ALAddress
+  - users[i].hand_delivery_address: ALAddress
   - other_parties: ALPeopleList.using(there_are_any=True)
+  - other_parties[i].lawyer: ALIndividual
+  - other_parties[i].hand_delivery_address: ALAddress
+  - rental_property: ALAddress
   - conditions: DAList.using(object_type=Thing, complete_attribute='complete', there_are_any=True)
   - defenses: DAList.using(object_type=Thing, complete_attribute='complete', there_are_any=True)
   - claims: DAList.using(object_type=Thing, complete_attribute='complete', there_are_any=True)
-  - other_parties[i].lawyer: ALIndividual
   - delivery_parties: ALPeopleList.using(there_are_any=True)
   - delivery_parties[i].lawyer: ALIndividual
   - answer_responses: DAList.using(object_type=DAObject, complete_attribute=['complete'], there_are_any=True)
@@ -74,8 +76,9 @@ code: |
   if trial_court_index == -1:
     cclahd_info
   case_number
-  if trial_with != "judge only":
-    jury_demand_filing_info
+  trial_with
+  #if trial_with != "judge only":
+  #  jury_demand_filing_info
     
   set_progress(30)
   nav.set_section('section_answer')
@@ -603,7 +606,7 @@ subquestion: |
 
   <div class="alert alert-info ilao-info" role="alert">
     <h6 class="alert-heading">What it means to sign your forms</h6>
-    <p>By signing your <i>Appearance</i> and </i>Jury Request</i>, you are certifying that:</p>
+    <p>By signing your <i>Appearance</i> and <i>Jury Request</i>, you are certifying that:</p>
     <p><ul>
       <li>You read the document,</li>
       <li>You believe it to be true and correct, and</li>
@@ -1112,6 +1115,8 @@ subquestion: |
   Enter details about your affirmative defense.
 fields:
   - Short name or description of the affirmative defense: defenses[i].name.text
+    input type: area
+    rows: 2
     maxlength: 60
   - Facts that support your defense:: defenses[i].details
     input type: area
@@ -1152,14 +1157,10 @@ subquestion: |
 fields:
   - Do you have additional information you want the judge to consider?: has_additional_info
     datatype: yesnoradio
-  - note: |
-      **Additional information**
-    show if:
-      variable: has_additional_info
-      is: True  
-  - no label: additional_defense_information
+  - Additional information: additional_defense_information
+    label above field: True
     input type: area
-    rows: 8
+    rows: 9
     maxlength: 600
     required: False
     show if:
@@ -1216,13 +1217,13 @@ subquestion: |
 fields:
   - State what you are claiming and the facts that support your claims:: claims[i].name.text
     input type: area
-    rows: 10
+    rows: 11
     maxlength: 500
     help: |
       The form has limited space. You can fit more words if you don't break lines with the Enter or Return key. 
   - List what the landlord should pay you and what else the law requires them to do:: claims[i].details
     input type: area
-    rows: 6
+    rows: 7
     maxlength: 275
     help: |
       The form has limited space. You can fit more words if you don't break lines with the Enter or Return key. 
@@ -1252,11 +1253,21 @@ code: |
 id: appearance only warning
 continue button field: appearance_only
 question: |
+  % if trial_with == "Judge only":
   *Appearance* only
+  % else:
+  *Appearance* and *Jury Request* only
+  % endif  
 subquestion: |
+  % if trial_with == "Judge only":
   Since you did not want to file a written Answer, bring up an affirmative defense, or file any counterclaims, this program will only make an *Appearance* form.
   
-  The *Appearance* tells the court and other parties that you are participating in the court case. It also tells the court if you want a jury along with the judge at trial.
+  The *Appearance* tells the court and other parties that you are participating in the court case.
+  % else:
+  Since you did not want to file a written Answer, bring up an affirmative defense, or file any counterclaims, this program will only make *Appearance* and *Jury Request* forms.
+  
+  The *Appearance* tells the court and other parties that you are participating in the court case. The *Jury Request* tells the court you want a jury along with the judge at trial.
+  % endif  
 ---
 id: answer required warning
 continue button field: answer_required
@@ -1850,8 +1861,8 @@ code: |
 
 ---
 objects:
-  - al_user_bundle: ALDocumentBundle.using(elements=[instructions, appearance_single_pdf_bundle, answer_bundle, counterclaims], filename="appearance_and_answer.pdf", title="All forms")
-  - al_court_bundle: ALDocumentBundle.using(elements=[appearance_single_pdf_bundle, answer_bundle, counterclaims], filename="appearance_and_answer.pdf", title="Appearance and Answer")
+  - al_user_bundle: ALDocumentBundle.using(elements=[instructions, appearance_single_pdf_bundle, jury_request_bundle, answer_bundle, counterclaims], filename="appearance_and_answer.pdf", title="All forms")
+  - al_court_bundle: ALDocumentBundle.using(elements=[appearance_single_pdf_bundle, jury_request_bundle, answer_bundle, counterclaims], filename="appearance_and_answer.pdf", title="Appearance and Answer")
 ---
 objects:
   - appearance_single_pdf_bundle: ALDocumentBundle.using(elements=[appearance_attachment, additional_delivery_bundle], filename="appearance.pdf", title="Appearance", enabled=True)
@@ -2096,8 +2107,8 @@ attachment:
       - "plaintiff_cb": ${ user_ask_role == 'plaintiff' }
       - "defendant_cb": ${ user_ask_role == 'defendant' }
 
-      - "jury_six": ${ trial_with == "Judge and six-person jury" }
-      - "jury_twelve": ${ trial_with == "Judge and twelve-person jury" }
+      - "jury_six": ${ trial_with == "judge and six-person jury" }
+      - "jury_twelve": ${ trial_with == "judge and twelve-person jury" }
       
       - "e_sign_name__1": ${ users[0].name.full(middle="full") if e_signature else '' }
       - "e_sign_name__2": ${ users[0].name.full(middle="full") if e_signature else '' }
@@ -2829,6 +2840,32 @@ review:
       **Your email:**
       ${ users[0].email }
     show if: users[0].email_notice
+  - Edit: pronouns_none
+    button: |
+      **What pronouns do you want the court to use?**
+      % if pronouns_none:
+      None specified
+      % else:
+      ${ pronouns }
+      % endif
+  - Edit: other_pronouns
+    button: |
+      **Other pronouns:**
+      ${ other_pronouns }
+    show if: pronouns['Other']
+  - Edit: prefix_none
+    button: |
+      **What prefix do you want the court to use?**
+      % if prefix_none:
+      None specified
+      % else:
+      ${ prefix }
+      % endif
+  - Edit: other_prefix
+    button: |
+      **Other prefix:**
+      ${ other_prefix }
+    show if: prefix['Other']
   - Edit: e_signature
     button: |
       **Do you want to add your e-signature to your forms?**
@@ -2886,11 +2923,14 @@ review:
       % if x.email_delivery == True:
         * Email
       % endif
-      % if x.hand_delivery == True:
-        * Hand
-      % endif
       % if x.mail_delivery == True:
-        * US mail or a delivery company
+        * US mail or delivery company
+      % endif
+      % if x.hand_delivery == True:
+        * Hand delivery
+      % endif
+      % if x.jail_delivery == True:
+        * Mail from prison or jail
       % endif
     show if: x.knows_delivery_method
   - Edit: x.delivery_date
@@ -2955,7 +2995,9 @@ question: |
 subquestion: |
   ${ answer_responses.table }
 
+  % if answer_responses.number() < 20:
   ${ answer_responses.add_action() }
+  % endif
 ---
 table: answer_responses.table
 rows: answer_responses
@@ -3321,7 +3363,7 @@ question: |
 subquestion: |
   ${ claims.table }
 
-  % if claims.number_gathered() < 5:
+  % if claims.number_gathered() < 3:
   ${ claims.add_action() }
   % endif
 ---
@@ -3388,6 +3430,32 @@ review:
       **Your email:**
       ${ users[0].email }
     show if: users[0].email_notice
+  - Edit: pronouns_none
+    button: |
+      **What pronouns do you want the court to use?**
+      % if pronouns_none:
+      None specified
+      % else:
+      ${ pronouns }
+      % endif
+  - Edit: other_pronouns
+    button: |
+      **Other pronouns:**
+      ${ other_pronouns }
+    show if: pronouns['Other']
+  - Edit: prefix_none
+    button: |
+      **What prefix do you want the court to use?**
+      % if prefix_none:
+      None specified
+      % else:
+      ${ prefix }
+      % endif
+  - Edit: other_prefix
+    button: |
+      **Other prefix:**
+      ${ other_prefix }
+    show if: prefix['Other']
   - Edit: e_signature
     button: |
       **Do you want to add your e-signature to your forms?**
