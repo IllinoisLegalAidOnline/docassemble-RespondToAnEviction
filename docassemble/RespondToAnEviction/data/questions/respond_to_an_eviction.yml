@@ -19,6 +19,7 @@ objects:
   - other_parties[i].hand_delivery_address: ALAddress
   - rental_property: ALAddress
   - conditions: DAList.using(object_type=Thing, complete_attribute='complete', there_are_any=True)
+  - protected_acts: DAList.using(object_type=Thing, complete_attribute='complete', there_are_any=True)
   - defenses: DAList.using(object_type=Thing, complete_attribute='complete', there_are_any=True)
   - claims: DAList.using(object_type=Thing, complete_attribute='complete', there_are_any=True)
   - delivery_parties: ALPeopleList.using(there_are_any=True)
@@ -77,8 +78,6 @@ code: |
     cclahd_info
   case_number
   trial_with
-  #if trial_with != "judge only":
-  #  jury_demand_filing_info
     
   set_progress(30)
   nav.set_section('section_answer')
@@ -97,7 +96,7 @@ code: |
   if conditions_defense:
     conditions.gather()
   if not retaliation_none:
-    retaliation_details
+    protected_acts.gather()
   waiver_defense
   rent_refusal_defense
   if other_defense:
@@ -179,7 +178,7 @@ subquestion: |
 
   This program helps you respond to an eviction by telling the court and the other parties that you are participating in the court case. It also helps you make an *Eviction Answer, Defenses, and Counterclaims* form that tells how you respond to what is written in the complaint.
   
-  To learn more, read ILAO's article about [**understanding an eviction**](https://www.illinoislegalaid.org/node/31071).
+  To learn more, read ILAO's article, [**Eviction basics**](https://www.illinoislegalaid.org/node/31071).
 field: sees_nav_bar
 ---
 id: instructions
@@ -281,15 +280,15 @@ fields:
     datatype: yesnoradio
 terms:
   - Notice of Termination: |
-      A notice to a tenant that their lease is ending. A lease can be terminated for different reasons. For example:
+      A **Notice of Termination** is a notice to a tenant that their lease is ending. A lease can be terminated for different reasons. For example:
       
-      * the tenant did not pay rent, sometimes called a 5-day notice,
-      * the tenant violated a term of the lease, sometimes called a 10-day notice, or
-      * the landlord does not want to renew the lease at the end of the lease period, sometimes called a 30-day notice.
+      * The tenant did not pay rent, sometimes called a 5-day notice,
+      * The tenant violated a term of the lease, sometimes called a 10-day notice, or
+      * The landlord does not want to renew the lease at the end of the lease period, sometimes called a 30-day notice.
   - Eviction Complaint: |
-      A court document used by a landlord to ask the court to evict the tenant.
+      An **Eviction Complaint** is a court document used by a landlord to ask the court to evict the tenant.
   - Summons: |
-      A notice to a defendant that a lawsuit against them was filed in a court and that the defendant has to show up in court.
+      A **Summons** is a notice to a defendant that a lawsuit against them was filed in a court and that the defendant has to show up in court.
 ---
 id: not eviction kickout
 event: not_eviction_kickout
@@ -322,6 +321,8 @@ content: |
   * Contracts for deed (also called rent to own agreements or installment sales agreements).
   
   Different laws apply to these types of evictions.
+
+  If you want to make forms to respond to these non-residential evictions or other kinds of lawsuits, use ILAO's [**Respond to a lawsuit Easy Form**](https://www.illinoislegalaid.org/node/49611).
 ---
 
 id: rental property address
@@ -427,7 +428,7 @@ subject: |
 content: |  
   The plaintiffs and defendants are usually listed near the top of a court form. If a form has a checkbox for unknown occupants, it will be by the list of defendants.
   
-  [FILE uknown_occupants_image.png, 100%, Eviction complaint unknown occupants]
+  [FILE unknown_occupants_image.png, 100%, Eviction complaint unknown occupants]
 ---
 # modified other opposing parties question
 # add to basic questions
@@ -510,11 +511,13 @@ question: |
 subquestion: |
   This program will make an *Appearance* you can file with the court. Whether or not you have filed a written *Appearance* before your court date, you still must go to court to tell the judge that you want to be a part of the case.
 
-  You have the right to a jury trial. If you want a jury trial, make sure you select that option in this program. This will check the appropriate box on the *Appearance* form. If you don't check that box, or if you don't file your *Appearance* before the court date and time on your Eviction Summons, you may lose the right to a jury trial.
+  You have the right to a jury trial. If you want a jury trial, make sure you select that option in this program. This will create a *Jury Request* form. If you don't file your *Jury Request* before the court date and time on your Eviction Summons, you may lose the right to a jury trial.
 
   If you haven't requested a jury by the first court date, the judge may give you additional time to do so if you ask, but there is no guarantee you will get extra time.
+
+  A trial with just a judge and no jury is called a bench trial.
   
-  To learn more, read ILAO's article about [**jury trials and judge trials**](https://www.illinoislegalaid.org/node/178441).
+  To learn more, read ILAO's article about [**jury trials and bench trials**](https://www.illinoislegalaid.org/node/178441).
 ---
 id: case number
 question: |
@@ -538,14 +541,16 @@ id: trial by jury
 question: |
   Who do you want to decide your case?
 subquestion: |
-  Note: There can be an additional fee for a jury trial.
+  **Note:** There can be an additional fee for a jury trial.
+
+  A trial with just a judge and no jury is called a bench trial.
   
-  To learn more, read ILAO's article about [**jury trials and judge trials**](https://www.illinoislegalaid.org/node/178441).
+  To learn more, read ILAO's article about [**jury trials and bench trials**](https://www.illinoislegalaid.org/node/178441).
 field: trial_with
 choices:
-  - A judge: judge only
-  - A judge and a 6-person jury: judge and six-person jury
-  - A judge and a 12-person jury: judge and twelve-person jury
+  - A judge: Judge only
+  - A judge and a 6-person jury: Judge and six-person jury
+  - A judge and a 12-person jury: Judge and twelve-person jury
 ---      
 id: e-filing a jury demand
 continue button field: jury_demand_filing_info
@@ -615,8 +620,8 @@ subquestion: |
     <p>See the <a href="https://ilcourtsaudio.blob.core.windows.net/antilles-resources/resources/9ce1fce9-895f-463e-b87d-f9b7631f8fde/Rule%20137.pdf"><b>Illinois Supreme Court Rule 137</b></a> for more information.</p>
     <p>By signing your <i>Eviction Answer</i>, <i>Counterclaims</i>, and the Proof of Delivery section of your forms, you are certifying that:</p>
     <p><ul>
-      <li>Everything on the forms is true and correct, and</li>
-      <li>You understand that making a false statement on the form is perjury, which can result in criminal penalties.</li>
+      <li>Everything on the forms is true and correct, or you have been informed or you believe it is true and correct, and</li>
+      <li>You understand that making a false statement on the form is perjury and has penalties provided by law.</li>
     </ul></p>
   <p>See the <a href="https://www.ilga.gov/legislation/ilcs/documents/073500050k1-109.htm"><b>Code of Civil Procedure, 735 ILCS 5/1-109</b></a> for more information.</p>
   </div>
@@ -626,7 +631,7 @@ fields:
     datatype: yesnoradio
 terms:
   - "e-signature": |
-      An e-signature is an electronic signature. It is a digital version of a signature that has the same effect as a hand-written signature. 
+      An **e-signature** is an electronic signature. It is a digital version of a signature that has the same effect as a hand-written signature. 
 ---
 # This code block checks if any affirmative defenses or counterclaims were raised. If so, then a written answer must be filed. This code will set optional_answer to True so that the user must give a general denial or respond to each claim individually.
 reconsider: True
@@ -797,7 +802,7 @@ question: |
 subquestion: |
   If a landlord wants to evict a tenant, they must follow the law in how they notify the tenant. If something was wrong with the Notice you received that told you about the eviction case, that may be a defense to this eviction case.
   
-  Note: It does not mean that the landlord can't evict you. It only means that they may have to start over and notify you in the proper way.
+  **Note:** It does not mean that the landlord can't evict you. It only means that they may have to start over and notify you in the proper way.
 
   Check all that apply.
 fields:
@@ -838,7 +843,7 @@ fields:
       is: "Yes"
   - Additional details about how you fixed the lease violation: cure_defense_details
     input type: area
-    rows: 5
+    rows: 6
     maxlength: 250
     required: False
     js show if: 
@@ -909,7 +914,7 @@ code: |
 ---
 id: retaliation
 question: |
-  Retaliation defense
+  Retaliation defense for protected complaints or activity
 subquestion: |
   You may have a defense of retaliation if you believe the landlord filed the eviction in retaliation for something you did. This means you complained about:
 
@@ -917,12 +922,18 @@ subquestion: |
   * A health violation, or
   * Another violation
 
-  about the property to an appropriate organization, and the landlord is evicting you for complaining.
+  about the property to someone, and the landlord is evicting you for complaining.
 
-  State law only protects you from being evicted if you complain to someone in government about your landlord or unit.
+  A state law, the [**Landlord Retaliation Act**](https://www.ilga.gov/legislation/ilcs/documents/076507210K5.htm), gives most renters protections against complaining about your landlord or unit. In addition, Chicago, Cook County, and other local jurisdictions may have extra protections for some renters.
 
-  Chicago, Cook County, and other local jurisdictions may have extra protections for some renters.
-
+  **Note:** To show the court that the landlord filed the eviction in retaliation for something you did, you will need to list:
+  
+  * What you said or did,
+  * The person or organizations involved, and
+  * When the protected activity happened.
+  
+  You can enter this information on the next screens.
+  
   Check all that apply.
 fields:
   - label: |
@@ -932,7 +943,7 @@ fields:
     required: False
     disable others: True
   - label: |
-      I am protected from retaliation by **State law**. My landlord retaliated against me because I complained to someone in government about a building code or violation within my unit.
+      I am protected from retaliation by **state law**. My landlord retaliated against me because I complained to someone about housing conditions or violation within my unit.
     field: retaliation_state
     datatype: yesnowide
     required: False
@@ -941,7 +952,7 @@ fields:
     field: retaliation_local
     datatype: yesnowide
     required: False
-  - Town or county ordinance where the property is located: retaliation_ordinance
+  - Town or county where the property is located: retaliation_ordinance
     maxlength: 30
     show if:
       variable: retaliation_local
@@ -957,46 +968,86 @@ fields:
       - The media: media
       - A tenants organization: tenants_org
       - Another person or entity: other
-    show if:
-      variable: retaliation_local
-      is: True
+    js show if: 
+      val("retaliation_local") == true || val("retaliation_state") == true
   - Other person or entity you complained to: retaliation_complain_to_other
     maxlength: 40
-    show if:
-      variable: retaliation_complain_to["other"]
-      is: True
+    js show if: 
+      (val("retaliation_local") == true || val("retaliation_state") == true) && val("retaliation_complain_to['other']") == true
   - Is your landlord retaliating against you because you did something else?: retaliation_activity
     datatype: yesnoradio
-    show if:
-      variable: retaliation_local
-      is: True
-  - Name the activity (you can give details on the next screen): retaliation_activity_name
+    js show if: 
+      val("retaliation_local") == true || val("retaliation_state") == true
+  - Name the other activity: retaliation_activity_name
     input type: area
     rows: 2
     maxlength: 70
     js show if: 
-      val("retaliation_local") == true && val("retaliation_activity") == true
+      (val("retaliation_local") == true || val("retaliation_state") == true ) && val("retaliation_activity") == true
 validation code: |
   if not (retaliation_none or retaliation_state or retaliation_local):
     validation_error("Please select one option.", field="retaliation_local")
-
 ---
 id: retaliation defense details
 question: |
-  Retaliation defense details
+  ${ ordinal(i).capitalize() } protected complaint or activity details
 subquestion: |
-  For your retaliation defense, explain:
+  Explain what you think caused the landlord to retaliate against you by filing an eviction.
   
-  * Who you complained about the landlord to,
-  * When you told them, and
-  * What you said to them.
+  The forms have room for up to 11 protected complaints or activities.
   
-  If your landlord retaliated against you for other activity you did, explain what you did and when.
+  Try to be specfic as possible.
 fields:
-  - no label: retaliation_details
-    datatype: area
-    rows: 5
-    maxlength: 350
+  - Do you know the exact date?: protected_acts[i].knows_date
+    datatype: yesnoradio
+	  help: |
+	    If you do not know the exact date, you can enter the month and year.
+  - Date: protected_acts[i].exact_date
+    datatype: ThreePartsDate
+    alMax: ${ today().format("yyyy-MM-dd") }
+    show if: 
+      variable: protected_acts[i].knows_date
+      is: True
+  - Approximate date (month and year): protected_acts[i].approx_date
+    maxlength: 12
+    show if: 
+      variable: protected_acts[i].knows_date
+      is: False
+  - Name of person or organization involved: protected_acts[i].involved
+    input type: area
+	  rows: 2
+	  maxlength: 60
+	  required: False
+  - What you told them or what you did: protected_acts[i].name.text
+    input type: area
+    rows: 3
+    maxlength: 120
+---
+id: any other protected acts
+question: |
+  Do you have other protected complaints or activites?
+subquestion: |
+  
+  You can enter up to 11 protected complaints or activities. So far you entered:
+
+  Date | People or organization involved | What you told them or did
+  -----|-----|-----
+  % for act in protected_acts:
+  ${act.exact_date if act.knows_date else act.approx_date } | ${ act.involved if defined("act.involved") else "" } | ${ act.name.text }
+  % endfor
+
+fields:
+  - "Add another protected complaint or activity?": protected_acts.there_is_another
+    datatype: yesnoradio
+---
+code: |
+  protected_acts[i].knows_date
+  protected_acts[i].name.text
+  protected_acts[i].complete = True
+---
+code: |
+  if protected_acts.number_gathered() >= 11:
+    protected_acts.there_is_another = False
 ---
 id: waiver defense
 question: |
@@ -1053,6 +1104,7 @@ fields:
       is: True
   - Date you tried to pay rent to the landlord: rent_payment_date
     datatype: date
+    max: ${ today().format("yyyy-MM-dd") }
     show if:
       variable: rent_refusal_defense
       is: True
@@ -1110,9 +1162,17 @@ fields:
 ---
 id: affirmative defense details
 question: |
+  % if i == 0:
   Affirmative defense details
+  % else:
+  ${ ordinal(i).capitalize() } affirmative defense details
+  % endif
 subquestion: |
+  % if i == 0:
   Enter details about your affirmative defense.
+  % else:
+  Enter details about your ${ ordinal(i) } affirmative defense.
+  % endif
 fields:
   - Short name or description of the affirmative defense: defenses[i].name.text
     input type: area
@@ -1233,7 +1293,7 @@ question: |
   Do you have other counterclaims?
 subquestion: |
   
-  You can enter up to 5 counterclaims. So far you have told us about:
+  You can enter up to 3 counterclaims. So far you have told us about:
   
   % for claim in claims:
    * ${claim.name.text}
@@ -1407,7 +1467,7 @@ content: |
   If you are in a prison or jail, you can deliver by mail.
 terms:
   - e-filing system: |
-      The court's e-filing system could be any approved electronic filing service provider (EFSP).
+      The court's **e-filing system** could be any approved electronic filing service provider (EFSP).
 ---
 id: user party delivery method
 #changed from generic object to users to allow for changing answers via Back
@@ -1440,6 +1500,12 @@ fields:
     required: False
   - US mail or delivery company (like UPS or FedEx): users[i].mail_delivery
     datatype: yesnowide
+  - Address or intersection of mailbox or delivery company: users[i].delivery_mail_address
+    address autocomplete: False
+    show if: 
+      variable: users[i].mail_delivery
+      is: True
+    required: False    
   - City of mailbox or delivery company: users[i].delivery_mail_city
     maxlength: 30
     show if: 
@@ -1534,6 +1600,12 @@ fields:
     required: False
   - US mail or delivery company (like UPS or FedEx): other_parties[i].mail_delivery
     datatype: yesnowide
+  - Address or intersection of mailbox or delivery company: other_parties[i].delivery_mail_address
+    address autocomplete: False
+    show if: 
+      variable: other_parties[i].mail_delivery
+      is: True
+    required: False
   - City of mailbox or delivery company: other_parties[i].delivery_mail_city
     maxlength: 30
     show if: 
@@ -1629,7 +1701,7 @@ question: |
 subquestion: |
   **Don't forget!** Make sure you review and complete the Proof of Delivery section of your forms. 
   
-  [FILE proof_of_delivery_snip_2024.png, 100%, Proof of Delivery section of forms]
+  [FILE proof_of_delivery_snip_2025.png, 100%, Proof of Delivery section of forms]
 
   **Instructions when delivering your forms by hand:**
 
@@ -1711,9 +1783,9 @@ question: |
   Download
 subquestion: |
   
-  Your forms are ready. View and download your forms below. Click **Make changes** to fix any mistakes.
+  Your forms are ready. View and download your forms below. Click **:edit: Make changes** to fix any mistakes.
 
-  This program **does not** file your forms with the court or deliver them to other parties in your case. You will need to do this yourself. Learn about [**e-filing in Illinois**](https://www.illinoiscourts.gov/eservices/information-for-filers-without-lawyers).
+  This program **does not file** your forms with the court or deliver them to other parties in your case. You will need to do this yourself. Learn about [**e-filing in Illinois**](https://www.illinoiscourts.gov/eservices/information-for-filers-without-lawyers).
 
   ${ action_button_html(url_action('review_answers'), label=':edit: Make changes', color='success', size="md") }
   
@@ -1723,7 +1795,7 @@ subquestion: |
 
   ${ al_user_bundle.send_button_html(show_editable_checkbox=False) }
 
-  **Note:** This program **does not** file your forms with the court or deliver them to other parties in your case. Learn about [**e-filing in Illinois**](https://www.illinoiscourts.gov/eservices/information-for-filers-without-lawyers).
+  **Note:** This program **does not file** your forms with the court or deliver them to other parties in your case. Learn about [**e-filing in Illinois**](https://www.illinoiscourts.gov/eservices/information-for-filers-without-lawyers).
   
   Thank you for using ILAO Easy Forms!
 under: |
@@ -1753,6 +1825,7 @@ objects:
   - additional_answer: ALDocument.using(title="Additional Paragraphs for Answer", filename="additional_answer.pdf", has_addendum=False)
   - additional_defenses_counterclaims: ALDocument.using(title="Additional Affirmative Defenses", filename="additional_defenses.pdf", has_addendum=False)
   - additional_conditions: ALDocument.using(title="Additional Conditions", filename="additional_conditions.pdf", has_addendum=False)
+  - additional_retaliation: ALDocument.using(title="Additional Complaints", filename="additional_retaliation.pdf", has_addendum=False)
   - counterclaims: ALDocument.using(title="Counterclaims", filename="counterclaims.pdf", has_addendum=False)
 ---
 #This needs to be a generic object because the delivery parties list entries point to entries in other lists.
@@ -1839,6 +1912,7 @@ code: |
   additional_answer.enabled = False
   additional_defenses_counterclaims.enabled = False
   additional_conditions.enabled = False
+  additional_retaliation.enabled = False
   counterclaims.enabled = False
 
   if optional_answer or notice_defense.any_true() or (cure_defense == "Yes" and cure_fixed == "Yes") or conditions_defense or retaliation_none == False or waiver_defense or rent_refusal_defense or other_defense or has_additional_info or has_counterclaims:
@@ -1852,6 +1926,10 @@ code: |
       if conditions.number() > 3:
         additional_conditions.enabled = True
 
+    if (retaliation_state or retaliation_local) and retaliation_none == False:
+      if protected_acts.number() > 3:
+        additional_retaliation.enabled = True
+  
     if other_defense:
       if defenses.number() > 1:
         additional_defenses_counterclaims.enabled = True
@@ -1867,7 +1945,7 @@ objects:
 objects:
   - appearance_single_pdf_bundle: ALDocumentBundle.using(elements=[appearance_attachment, additional_delivery_bundle], filename="appearance.pdf", title="Appearance", enabled=True)
   - jury_request_bundle: ALDocumentBundle.using(elements=[jury_request, additional_delivery_bundle], filename="jury_request.pdf", title="Jury Request")
-  - answer_bundle: ALDocumentBundle.using(elements=[eviction_answer, additional_answer, additional_conditions, additional_defenses_counterclaims, additional_delivery_bundle], filename="eviction_answer.pdf", title="Eviction Answer, Defenses, and Counterclaims", enabled=True)
+  - answer_bundle: ALDocumentBundle.using(elements=[eviction_answer, additional_answer, additional_conditions, additional_retaliation, additional_defenses_counterclaims, additional_delivery_bundle], filename="eviction_answer.pdf", title="Eviction Answer, Defenses, and Counterclaims", enabled=True)
 ---
 attachment:
   variable name: instructions[i]
@@ -1943,7 +2021,7 @@ attachment:
 
       - "delivery_party1_name_full": | 
           % if delivery_parties[0].is_represented:
-          ${ delivery_parties[0].lawyer.name.full(middle="full") }, (lawyer for ${ delivery_parties[0].name.full(middle="full") })
+          ${ delivery_parties[0].lawyer.name.full(middle="full") } (lawyer for ${ delivery_parties[0].name.full(middle="full") })
           % else:
           ${ delivery_parties[0].name.full(middle="full") }
           % endif
@@ -1968,7 +2046,7 @@ attachment:
 
       - "delivery_party2_name_full": | 
           % if delivery_parties[1].is_represented:
-          ${ delivery_parties[1].lawyer.name.full(middle="full") }, (lawyer for ${ delivery_parties[1].name.full(middle="full") })
+          ${ delivery_parties[1].lawyer.name.full(middle="full") } (lawyer for ${ delivery_parties[1].name.full(middle="full") })
           % else:
           ${ delivery_parties[1].name.full(middle="full") }
           % endif
@@ -2012,7 +2090,7 @@ attachment:
 
       - "delivery_party1_name_full": | 
           % if x.is_represented:
-          ${ x.lawyer.name.full(middle="full") }, (lawyer for ${ x.name.full(middle="full") })
+          ${ x.lawyer.name.full(middle="full") } (lawyer for ${ x.name.full(middle="full") })
           % else:
           ${ x.name.full(middle="full") }
           % endif
@@ -2037,7 +2115,7 @@ attachment:
 
       - "delivery_party2_name_full": | 
           % if x.second_person.is_represented:
-          ${ x.second_person.lawyer.name.full(middle="full") }, (lawyer for ${ x.second_person.name.full(middle="full") })
+          ${ x.second_person.lawyer.name.full(middle="full") } (lawyer for ${ x.second_person.name.full(middle="full") })
           % else:
           ${ x.second_person.name.full(middle="full") }
           % endif
@@ -2107,15 +2185,15 @@ attachment:
       - "plaintiff_cb": ${ user_ask_role == 'plaintiff' }
       - "defendant_cb": ${ user_ask_role == 'defendant' }
 
-      - "jury_six": ${ trial_with == "judge and six-person jury" }
-      - "jury_twelve": ${ trial_with == "judge and twelve-person jury" }
+      - "jury_six": ${ trial_with == "Judge and six-person jury" }
+      - "jury_twelve": ${ trial_with == "Judge and twelve-person jury" }
       
       - "e_sign_name__1": ${ users[0].name.full(middle="full") if e_signature else '' }
       - "e_sign_name__2": ${ users[0].name.full(middle="full") if e_signature else '' }
 
       - "delivery_party1_name_full": | 
           % if delivery_parties[0].is_represented:
-          ${ delivery_parties[0].lawyer.name.full(middle="full") }, (lawyer for ${ delivery_parties[0].name.full(middle="full") })
+          ${ delivery_parties[0].lawyer.name.full(middle="full") } (lawyer for ${ delivery_parties[0].name.full(middle="full") })
           % else:
           ${ delivery_parties[0].name.full(middle="full") }
           % endif
@@ -2140,7 +2218,7 @@ attachment:
 
       - "delivery_party2_name_full": | 
           % if delivery_parties[1].is_represented:
-          ${ delivery_parties[1].lawyer.name.full(middle="full") }, (lawyer for ${ delivery_parties[1].name.full(middle="full") })
+          ${ delivery_parties[1].lawyer.name.full(middle="full") } (lawyer for ${ delivery_parties[1].name.full(middle="full") })
           % else:
           ${ delivery_parties[1].name.full(middle="full") }
           % endif
@@ -2191,7 +2269,7 @@ attachment:
       
       - "delivery_party1_name_full": | 
           % if x.is_represented:
-          ${ x.lawyer.name.full(middle="full") }, (lawyer for ${ x.name.full(middle="full") })
+          ${ x.lawyer.name.full(middle="full") } (lawyer for ${ x.name.full(middle="full") })
           % else:
           ${ x.name.full(middle="full") }
           % endif
@@ -2208,7 +2286,7 @@ attachment:
       
       - "delivery_party2_name_full": | 
           % if x.second_person.is_represented:
-          ${ x.second_person.lawyer.name.full(middle="full") }, (lawyer for ${ x.second_person.name.full(middle="full") })
+          ${ x.second_person.lawyer.name.full(middle="full") } (lawyer for ${ x.second_person.name.full(middle="full") })
           % else:
           ${ x.second_person.name.full(middle="full") }
           % endif
@@ -2250,6 +2328,7 @@ attachment:
     - "case_number__3": ${ case_number }
     - "case_number__4": ${ case_number }
     - "case_number__5": ${ case_number }
+    - "case_number__6": ${ case_number }
     - "unknown_occupants_cb": ${ unknown_occupants }
     - "property_address": ${ rental_property.on_one_line(bare=True) }
     - "general_denial_cb": ${ general_denial and optional_answer }
@@ -2334,21 +2413,68 @@ attachment:
     - "additional_conditions": ${ True if conditions_defense and conditions.number() > 3 else ''}
 
     - "retaliation_cb": ${ (retaliation_state or retaliation_local) and retaliation_none == False }
-    - "retaliation_state": ${ (retaliation_state) and retaliation_none == False }
     - "retaliation_local": ${ (retaliation_local) and retaliation_none == False }
     - "retaliation_ordinance": ${ retaliation_ordinance if retaliation_local and retaliation_none == False else '' }
-    - "retaliation_landlord": ${ retaliation_complain_to["landlord"] and retaliation_local and retaliation_none == False}
-    - "retaliation_legal_org": ${ retaliation_complain_to["legal_org"] and retaliation_local and retaliation_none == False}
-    - "retaliation_community_group": ${ retaliation_complain_to["community_group"] and retaliation_local and retaliation_none == False}
-    - "retaliation_government": ${ retaliation_complain_to["government"] and retaliation_local and retaliation_none == False}
-    - "retaliation_media": ${ retaliation_complain_to["media"] and retaliation_local and retaliation_none == False}
-    - "retaliation_tenants_org": ${ retaliation_complain_to["tenants_org"] and retaliation_local and retaliation_none == False}
-    - "retaliation_other": ${ retaliation_complain_to["other"] and retaliation_local and retaliation_none == False}
-    - "retaliation_complain_to_other": ${ retaliation_complain_to_other if retaliation_complain_to["other"] and retaliation_local and retaliation_none == False else '' }
-    - "retaliation_activity": ${ retaliation_activity and retaliation_local and retaliation_none == False }
-    - "retaliation_activity_name": ${ retaliation_activity_name if retaliation_activity and retaliation_local and retaliation_none == False else '' }
-    - "retaliation_details": ${ retaliation_details if (retaliation_state or retaliation_local) and retaliation_none == False else '' }
-
+    - "retaliation_landlord": ${ retaliation_complain_to["landlord"] and (retaliation_state or retaliation_local) and retaliation_none == False}
+    - "retaliation_legal_org": ${ retaliation_complain_to["legal_org"] and (retaliation_state or retaliation_local) and retaliation_none == False}
+    - "retaliation_community_group": ${ retaliation_complain_to["community_group"] and (retaliation_state or retaliation_local) and retaliation_none == False}
+    - "retaliation_government": ${ retaliation_complain_to["government"] and (retaliation_state or retaliation_local) and retaliation_none == False}
+    - "retaliation_media": ${ retaliation_complain_to["media"] and (retaliation_state or retaliation_local) and retaliation_none == False}
+    - "retaliation_tenants_org": ${ retaliation_complain_to["tenants_org"] and (retaliation_state or retaliation_local) and retaliation_none == False}
+    - "retaliation_other": ${ retaliation_complain_to["other"] and (retaliation_state or retaliation_local) and retaliation_none == False}
+    - "retaliation_complain_to_other": ${ retaliation_complain_to_other if retaliation_complain_to["other"] and (retaliation_state or retaliation_local) and retaliation_none == False else '' }
+    - "retaliation_activity": ${ retaliation_activity and (retaliation_state or retaliation_local) and retaliation_none == False }
+    - "retaliation_activity_name": ${ retaliation_activity_name if retaliation_activity and (retaliation_state or retaliation_local) and retaliation_none == False else '' }
+    - "protected_acts_date_0": |
+        % if (retaliation_state or retaliation_local) and retaliation_none == False:
+        % if protected_acts[0].knows_date:
+        ${ protected_acts[0].exact_date }
+        % else:
+        ${ protected_acts[0].approx_date }
+        % endif
+        % endif
+    - "protected_acts_entity_0": | 
+        % if (retaliation_state or retaliation_local) and retaliation_none == False:
+        ${ protected_acts[0].involved }
+        % endif
+    - "protected_acts_text_0": |
+        % if (retaliation_state or retaliation_local) and retaliation_none == False:
+        ${ protected_acts[0].name.text }
+        % endif
+    - "protected_acts_date_1": |
+        % if (retaliation_state or retaliation_local) and retaliation_none == False:
+        % if protected_acts[1].knows_date:
+        ${ protected_acts[1].exact_date }
+        % else:
+        ${ protected_acts[1].approx_date }
+        % endif
+        % endif
+    - "protected_acts_entity_1": | 
+        % if (retaliation_state or retaliation_local) and retaliation_none == False:
+        ${ protected_acts[1].involved }
+        % endif
+    - "protected_acts_text_1": |
+        % if (retaliation_state or retaliation_local) and retaliation_none == False:
+        ${ protected_acts[1].name.text }
+        % endif
+    - "protected_acts_date_2": |
+        % if (retaliation_state or retaliation_local) and retaliation_none == False:
+        % if protected_acts[2].knows_date:
+        ${ protected_acts[2].exact_date }
+        % else:
+        ${ protected_acts[2].approx_date }
+        % endif
+        % endif
+    - "protected_acts_entity_2": | 
+        % if (retaliation_state or retaliation_local) and retaliation_none == False:
+        ${ protected_acts[2].involved }
+        % endif
+    - "protected_acts_text_2": |
+        % if (retaliation_state or retaliation_local) and retaliation_none == False:
+        ${ protected_acts[2].name.text }
+        % endif
+    - "additional_protected_acts_cb": ${ True if (retaliation_state or retaliation_local) and retaliation_none == False and protected_acts.number() > 3 else ''}
+      
     - "waiver_cb": ${ waiver_defense }
     - "new_lease_date": ${ new_lease_signed_date if waiver_defense else '' }
     - "rent_accepted_date": ${ rent_accepted_date if waiver_defense else '' }
@@ -2361,6 +2487,7 @@ attachment:
 
     - "other_defense_cb": ${ other_defense }
     - "other_defense_name_1": ${ defenses[0].name.text if other_defense else '' }
+    - "other_defense_next_page_1": ${ "See next page for details" if other_defense else '' }
     - "other_defense_details_1": ${ defenses[0].details if other_defense else '' }
     - "additional_affirmative_defenses": ${ True if other_defense and defenses.number() > 1 else ''}
     - "additional_defense_information": ${ additional_defense_information if has_additional_info else '' }
@@ -2371,7 +2498,7 @@ attachment:
     - "e_sign_name__2": ${ users[0].name.full(middle="full") if e_signature else '' }
     - "delivery_party1_name_full": | 
         % if delivery_parties[0].is_represented:
-        ${ delivery_parties[0].lawyer.name.full(middle="full") }, (lawyer for ${ delivery_parties[0].name.full(middle="full") })
+        ${ delivery_parties[0].lawyer.name.full(middle="full") } (lawyer for ${ delivery_parties[0].name.full(middle="full") })
         % else:
         ${ delivery_parties[0].name.full(middle="full") }
         % endif
@@ -2382,13 +2509,40 @@ attachment:
     - "is_delivery_party1_efm_yes": ${ delivery_parties[0].efm_delivery if delivery_parties[0].knows_delivery_method else '' }
     - "is_delivery_party1_email_yes": ${ delivery_parties[0].email_delivery if delivery_parties[0].knows_delivery_method else '' }
     - "delivery_party1_date": ${ delivery_parties[0].delivery_date if delivery_parties[0].knows_delivery_method and delivery_parties[0].knows_delivery_date else '' }
-    - "delivery_party1_time": ${ format_time(delivery_parties[0].delivery_time, format='h:mm') if delivery_parties[0].knows_delivery_method and delivery_parties[0].knows_delivery_time else '' }
-    - "is_delivery_party1_am_yes": ${ True if delivery_parties[0].knows_delivery_method and format_time(delivery_parties[0].delivery_time, format='a')=='AM' else '' }
-    - "is_delivery_party1_am_no": ${ True if delivery_parties[0].knows_delivery_method and format_time(delivery_parties[0].delivery_time, format='a')=='PM' else '' }
+    - "delivery_party1_time": ${ format_time(delivery_parties[0].delivery_time, format='h:mm a') if delivery_parties[0].knows_delivery_method and delivery_parties[0].knows_delivery_time else '' }
+      
+    - "is_delivery_party1_electronic": ${ True if delivery_parties[0].knows_delivery_method and ( delivery_parties[0].efm_delivery or delivery_parties[0].email_delivery ) else '' }
+    - "is_delivery_party1_not_electronic": ${ True if delivery_parties[0].knows_delivery_method and ( delivery_parties[0].mail_delivery or delivery_parties[0].hand_delivery or delivery_parties[0].jail_delivery ) else '' }
+    - "delivery_party1_mail_location": |
+        % if delivery_parties[0].knows_delivery_method and delivery_parties[0].mail_delivery:
+        % if delivery_parties[0].delivery_mail_address != "" and delivery_parties[0].delivery_mail_city != "" and delivery_parties[0].delivery_mail_state != "":
+        ${delivery_parties[0].delivery_mail_address }, ${delivery_parties[0].delivery_mail_city}, ${ state_name(delivery_parties[0].delivery_mail_state) }
+        % elif delivery_parties[0].delivery_mail_address != "" and delivery_parties[0].delivery_mail_city != "":
+        ${delivery_parties[0].delivery_mail_address }, ${delivery_parties[0].delivery_mail_city}
+        % elif delivery_parties[0].delivery_mail_address != "" and delivery_parties[0].delivery_mail_state != "":
+        ${delivery_parties[0].delivery_mail_address }, ${ state_name(delivery_parties[0].delivery_mail_state) }
+        % elif delivery_parties[0].delivery_mail_city != "" and delivery_parties[0].delivery_mail_state != "":
+        ${delivery_parties[0].delivery_mail_city}, ${ state_name(delivery_parties[0].delivery_mail_state) }
+        % elif delivery_parties[0].delivery_mail_address != "":
+        ${delivery_parties[0].delivery_mail_address}
+        % elif delivery_parties[0].delivery_mail_city != "":
+        ${delivery_parties[0].delivery_mail_city}
+        % else:
+        ${state_name(delivery_parties[0].delivery_mail_state)}
+        % endif
+        % else:
+        ${ "" }
+        % endif
+    
+    - "delivery_party1_mail_city": ${ delivery_parties[0].delivery_mail_city if delivery_parties[0].knows_delivery_method and delivery_parties[0].mail_delivery else '' }
+    - "delivery_party1_mail_state": ${ state_name(delivery_parties[0].delivery_mail_state) if delivery_parties[0].knows_delivery_method and delivery_parties[0].mail_delivery else '' }
+    - "delivery_party1_hand_address": ${ delivery_parties[0].hand_delivery_address.on_one_line(bare=True) if delivery_parties[0].knows_delivery_method and delivery_parties[0].hand_delivery else '' }
+    - "is_delivery_party1_jail_yes": ${ True if delivery_parties[0].knows_delivery_method and delivery_parties[0].jail_delivery else '' }
+    - "delivery_party1_jail_name": ${ delivery_parties[0].delivery_jail_name if delivery_parties[0].knows_delivery_method and delivery_parties[0].jail_delivery else '' }
 
     - "delivery_party2_name_full": | 
         % if delivery_parties[1].is_represented:
-        ${ delivery_parties[1].lawyer.name.full(middle="full") }, (lawyer for ${ delivery_parties[1].name.full(middle="full") })
+        ${ delivery_parties[1].lawyer.name.full(middle="full") } (lawyer for ${ delivery_parties[1].name.full(middle="full") })
         % else:
         ${ delivery_parties[1].name.full(middle="full") }
         % endif
@@ -2399,9 +2553,35 @@ attachment:
     - "is_delivery_party2_efm_yes": ${ delivery_parties[1].efm_delivery if delivery_parties[1].knows_delivery_method else '' }
     - "is_delivery_party2_email_yes": ${ delivery_parties[1].email_delivery if delivery_parties[1].knows_delivery_method else '' }
     - "delivery_party2_date": ${ delivery_parties[1].delivery_date if delivery_parties[1].knows_delivery_method and delivery_parties[1].knows_delivery_date else '' }
-    - "delivery_party2_time": ${ format_time(delivery_parties[1].delivery_time, format='h:mm') if delivery_parties[1].knows_delivery_method and delivery_parties[1].knows_delivery_time else '' }
-    - "is_delivery_party2_am_yes": ${ True if delivery_parties[1].knows_delivery_method and format_time(delivery_parties[1].delivery_time, format='a')=='AM' else '' }
-    - "is_delivery_party2_am_no": ${ True if delivery_parties[1].knows_delivery_method and format_time(delivery_parties[1].delivery_time, format='a')=='PM' else '' }
+    - "delivery_party2_time": ${ format_time(delivery_parties[1].delivery_time, format='h:mm a') if delivery_parties[1].knows_delivery_method and delivery_parties[1].knows_delivery_time else '' }
+    
+    - "is_delivery_party2_electronic": ${ True if delivery_parties[1].knows_delivery_method and ( delivery_parties[1].efm_delivery or delivery_parties[1].email_delivery ) else '' }
+    - "is_delivery_party2_not_electronic": ${ True if delivery_parties[1].knows_delivery_method and ( delivery_parties[1].mail_delivery or delivery_parties[1].hand_delivery or delivery_parties[1].jail_delivery ) else '' }
+    - "delivery_party2_mail_location": |
+        % if delivery_parties[1].knows_delivery_method and delivery_parties[1].mail_delivery:
+        % if delivery_parties[1].delivery_mail_address != "" and delivery_parties[1].delivery_mail_city != "" and delivery_parties[1].delivery_mail_state != "":
+        ${delivery_parties[1].delivery_mail_address }, ${delivery_parties[1].delivery_mail_city}, ${ state_name(delivery_parties[1].delivery_mail_state) }
+        % elif delivery_parties[1].delivery_mail_address != "" and delivery_parties[1].delivery_mail_city != "":
+        ${delivery_parties[1].delivery_mail_address }, ${delivery_parties[1].delivery_mail_city}
+        % elif delivery_parties[1].delivery_mail_address != "" and delivery_parties[1].delivery_mail_state != "":
+        ${delivery_parties[1].delivery_mail_address }, ${ state_name(delivery_parties[1].delivery_mail_state) }
+        % elif delivery_parties[1].delivery_mail_city != "" and delivery_parties[1].delivery_mail_state != "":
+        ${delivery_parties[1].delivery_mail_city}, ${ state_name(delivery_parties[1].delivery_mail_state) }
+        % elif delivery_parties[1].delivery_mail_address != "":
+        ${delivery_parties[1].delivery_mail_address}
+        % elif delivery_parties[1].delivery_mail_city != "":
+        ${delivery_parties[1].delivery_mail_city}
+        % else:
+        ${state_name(delivery_parties[1].delivery_mail_state)}
+        % endif
+        % else:
+        ${ "" }
+        % endif      
+    - "delivery_party2_mail_city": ${ delivery_parties[1].delivery_mail_city if delivery_parties[1].knows_delivery_method and delivery_parties[1].mail_delivery else '' }
+    - "delivery_party2_mail_state": ${ state_name(delivery_parties[1].delivery_mail_state) if delivery_parties[1].knows_delivery_method and delivery_parties[1].mail_delivery else '' }
+    - "delivery_party2_hand_address": ${ delivery_parties[1].hand_delivery_address.on_one_line(bare=True) if delivery_parties[1].knows_delivery_method and delivery_parties[1].hand_delivery else '' }
+    - "is_delivery_party2_jail_yes": ${ True if delivery_parties[1].knows_delivery_method and delivery_parties[1].jail_delivery else '' }
+    - "delivery_party2_jail_name": ${ delivery_parties[1].delivery_jail_name if delivery_parties[1].knows_delivery_method and delivery_parties[1].jail_delivery else '' }
     
     - "is_additional_proof_delivery_yes": ${ delivery_parties.number() > 2 }
 ---
@@ -2574,8 +2754,157 @@ attachment:
     - "conditions_fixed_14": ${ format_date(conditions[13].date_fixed, format='MMM d, yyyy') if conditions[13].date_fixed !='' else '' }
     - "conditions_fixed_15": ${ format_date(conditions[14].date_fixed, format='MMM d, yyyy') if conditions[14].date_fixed !='' else '' }
     - "conditions_fixed_16": ${ format_date(conditions[15].date_fixed, format='MMM d, yyyy') if conditions[15].date_fixed !='' else '' }
+---
+attachment:
+  variable name: additional_retaliation[i]
+  name: additional_retaliation
+  filename: additional_retaliation
+  skip undefined: True
+  editable: False
+  pdf template file: additional_retaliation.pdf
+  fields:
+    - "trial_court_county": ${ trial_court.address.county.upper() }
+    - "plaintiffs": ${ users.full_names() if user_ask_role == 'plaintiff' else other_parties.full_names() }
+    - "defendants": ${ other_parties.full_names() if user_ask_role == 'plaintiff' else users.full_names() }
+    - "case_number__1": ${ case_number }
+    - "unknown_occupants_cb": ${ unknown_occupants }
+    - "property_address": ${ rental_property.on_one_line(bare=True) }
 
+    - "protected_acts_date_3": |
+        % if (retaliation_state or retaliation_local) and retaliation_none == False:
+        % if protected_acts[3].knows_date:
+        ${ protected_acts[3].exact_date }
+        % else:
+        ${ protected_acts[3].approx_date }
+        % endif
+        % endif
+    - "protected_acts_entity_3": | 
+        % if (retaliation_state or retaliation_local) and retaliation_none == False:
+        ${ protected_acts[3].involved }
+        % endif
+    - "protected_acts_text_3": |
+        % if (retaliation_state or retaliation_local) and retaliation_none == False:
+        ${ protected_acts[3].name.text }
+        % endif
 
+    - "protected_acts_date_4": |
+        % if (retaliation_state or retaliation_local) and retaliation_none == False:
+        % if protected_acts[4].knows_date:
+        ${ protected_acts[4].exact_date }
+        % else:
+        ${ protected_acts[4].approx_date }
+        % endif
+        % endif
+    - "protected_acts_entity_4": | 
+        % if (retaliation_state or retaliation_local) and retaliation_none == False:
+        ${ protected_acts[4].involved }
+        % endif
+    - "protected_acts_text_4": |
+        % if (retaliation_state or retaliation_local) and retaliation_none == False:
+        ${ protected_acts[4].name.text }
+        % endif
+
+    - "protected_acts_date_5": |
+        % if (retaliation_state or retaliation_local) and retaliation_none == False:
+        % if protected_acts[5].knows_date:
+        ${ protected_acts[5].exact_date }
+        % else:
+        ${ protected_acts[5].approx_date }
+        % endif
+        % endif
+    - "protected_acts_entity_5": | 
+        % if (retaliation_state or retaliation_local) and retaliation_none == False:
+        ${ protected_acts[5].involved }
+        % endif
+    - "protected_acts_text_5": |
+        % if (retaliation_state or retaliation_local) and retaliation_none == False:
+        ${ protected_acts[5].name.text }
+        % endif
+
+    - "protected_acts_date_6": |
+        % if (retaliation_state or retaliation_local) and retaliation_none == False:
+        % if protected_acts[6].knows_date:
+        ${ protected_acts[6].exact_date }
+        % else:
+        ${ protected_acts[6].approx_date }
+        % endif
+        % endif
+    - "protected_acts_entity_6": | 
+        % if (retaliation_state or retaliation_local) and retaliation_none == False:
+        ${ protected_acts[6].involved }
+        % endif
+    - "protected_acts_text_6": |
+        % if (retaliation_state or retaliation_local) and retaliation_none == False:
+        ${ protected_acts[6].name.text }
+        % endif
+
+    - "protected_acts_date_7": |
+        % if (retaliation_state or retaliation_local) and retaliation_none == False:
+        % if protected_acts[7].knows_date:
+        ${ protected_acts[7].exact_date }
+        % else:
+        ${ protected_acts[7].approx_date }
+        % endif
+        % endif
+    - "protected_acts_entity_7": | 
+        % if (retaliation_state or retaliation_local) and retaliation_none == False:
+        ${ protected_acts[7].involved }
+        % endif
+    - "protected_acts_text_7": |
+        % if (retaliation_state or retaliation_local) and retaliation_none == False:
+        ${ protected_acts[7].name.text }
+        % endif
+
+    - "protected_acts_date_8": |
+        % if (retaliation_state or retaliation_local) and retaliation_none == False:
+        % if protected_acts[8].knows_date:
+        ${ protected_acts[8].exact_date }
+        % else:
+        ${ protected_acts[8].approx_date }
+        % endif
+        % endif
+    - "protected_acts_entity_8": | 
+        % if (retaliation_state or retaliation_local) and retaliation_none == False:
+        ${ protected_acts[8].involved }
+        % endif
+    - "protected_acts_text_8": |
+        % if (retaliation_state or retaliation_local) and retaliation_none == False:
+        ${ protected_acts[8].name.text }
+        % endif
+
+    - "protected_acts_date_9": |
+        % if (retaliation_state or retaliation_local) and retaliation_none == False:
+        % if protected_acts[9].knows_date:
+        ${ protected_acts[9].exact_date }
+        % else:
+        ${ protected_acts[9].approx_date }
+        % endif
+        % endif
+    - "protected_acts_entity_9": | 
+        % if (retaliation_state or retaliation_local) and retaliation_none == False:
+        ${ protected_acts[9].involved }
+        % endif
+    - "protected_acts_text_9": |
+        % if (retaliation_state or retaliation_local) and retaliation_none == False:
+        ${ protected_acts[9].name.text }
+        % endif
+
+    - "protected_acts_date_10": |
+        % if (retaliation_state or retaliation_local) and retaliation_none == False:
+        % if protected_acts[10].knows_date:
+        ${ protected_acts[10].exact_date }
+        % else:
+        ${ protected_acts[10].approx_date }
+        % endif
+        % endif
+    - "protected_acts_entity_10": | 
+        % if (retaliation_state or retaliation_local) and retaliation_none == False:
+        ${ protected_acts[10].involved }
+        % endif
+    - "protected_acts_text_10": |
+        % if (retaliation_state or retaliation_local) and retaliation_none == False:
+        ${ protected_acts[10].name.text }
+        % endif
 
 ---
 ############### Review page
@@ -2731,27 +3060,33 @@ review:
       % if retaliation_complain_to['other']:
       * Another person or entity
       % endif
-    show if: retaliation_local and retaliation_none == False
+      % if not retaliation_complain_to.any_true():
+      * None selected
+      % endif
+    show if: retaliation_none == False and (retaliation_local or retaliation_state)
   - Edit: retaliation_complain_to_other
     button: |
       **Other person or entity you complained to:**
       ${ retaliation_complain_to_other }
-    show if: retaliation_local and retaliation_complain_to['other'] and retaliation_none == False
+    show if: retaliation_none == False and (retaliation_local or retaliation_state) and retaliation_complain_to['other']
   - Edit: retaliation_activity
     button: |
       **Is your landlord retaliating against you because you did something else?**
       ${ word(yesno(retaliation_activity)) }      
-    show if: retaliation_local and retaliation_none == False
+    show if: retaliation_none == False and (retaliation_local or retaliation_state)
   - Edit: retaliation_activity_name
     button: |
       **Other protected activity:**
       ${ retaliation_activity_name }      
-    show if: retaliation_local and retaliation_activity and retaliation_none == False
-  - Edit: retaliation_details
+    show if: retaliation_none == False and (retaliation_local or retaliation_state) and retaliation_activity
+  - Edit: protected_acts.revisit
     button: |
-      **Retaliation details:**
-      ${ retaliation_details}
-    show if: (retaliation_state or retaliation_local) and retaliation_none == False
+      **Protected act details: (Edit to change)**
+
+      % for my_var in protected_acts:
+        * **Date:** ${my_var.exact_date if my_var.knows_date else my_var.approx_date }, **involved:** ${ my_var.involved if defined("my_var.involved") else "" }, **activity:** ${ my_var.name.text }
+      % endfor
+    show if: retaliation_none == False and (retaliation_local or retaliation_state)
   - Edit: waiver_defense
     button: |
       **Did the landlord act like the lease continued after learning of a lease violation, also known as a "waiver" defense?**
@@ -3233,27 +3568,33 @@ review:
       % if retaliation_complain_to['other']:
       * Another person or entity
       % endif
-    show if: retaliation_local and retaliation_none == False
+      % if not retaliation_complain_to.any_true():
+      * None selected
+      % endif
+    show if: retaliation_none == False and (retaliation_local or retaliation_state)
   - Edit: retaliation_complain_to_other
     button: |
       **Other person or entity you complained to:**
       ${ retaliation_complain_to_other }
-    show if: retaliation_local and retaliation_complain_to['other'] and retaliation_none == False
+    show if: retaliation_none == False and (retaliation_local or retaliation_state) and retaliation_complain_to['other']
   - Edit: retaliation_activity
     button: |
       **Is your landlord retaliating against you because you did something else?**
       ${ word(yesno(retaliation_activity)) }      
-    show if: retaliation_local and retaliation_none == False
+    show if: retaliation_none == False and (retaliation_local or retaliation_state)
   - Edit: retaliation_activity_name
     button: |
       **Other protected activity:**
       ${ retaliation_activity_name }      
-    show if: retaliation_local and retaliation_activity and retaliation_none == False
-  - Edit: retaliation_details
+    show if: retaliation_none == False and (retaliation_local or retaliation_state) and retaliation_activity
+  - Edit: protected_acts.revisit
     button: |
-      **Retaliation details:**
-      ${ retaliation_details}
-    show if: (retaliation_state or retaliation_local) and retaliation_none == False
+      **Protected act details: (Edit to change)**
+
+      % for my_var in protected_acts:
+        * **Date:** ${my_var.exact_date if my_var.knows_date else my_var.approx_date }, **involved:** ${ my_var.involved if defined("my_var.involved") else "" }, **activity:** ${ my_var.name.text }
+      % endfor
+    show if: retaliation_none == False and (retaliation_local or retaliation_state)
   - Edit: waiver_defense
     button: |
       **Did the landlord act like the lease continued after learning of a lease violation, also known as a "waiver" defense?**
@@ -3333,6 +3674,32 @@ columns:
       row_item.name.text if defined("row_item.name.text") else ""
   - Dates (when problem started and when landlord fixed, if any): |
       action_button_html(url_action(row_item.attr_name("name.text")), label="Edit", icon="pencil-alt")
+delete buttons: True
+confirm: True
+---
+id: protected acts revisit review screen
+continue button field: protected_acts.revisit
+section: Protected complaints or activities
+question: |
+  Edit the protected complaints or activities
+subquestion: |
+  ${ protected_acts.table }
+
+  % if protected_acts.number_gathered() < 11:
+  ${ protected_acts.add_action() }
+  % endif
+---
+table: protected_acts.table
+rows: protected_acts
+columns:
+  - Date: |
+      row_item.exact_date if row_item.knows_date else row_item.approx_date
+  - People or organization involved: |
+      row_item.involved if defined("row_item.involved") else ""
+  - What you told them or did: |
+      row_item.name.text if defined("row_item.name.text") else ""
+  - Actions: |
+      action_button_html(url_action(row_item.attr_name("name.text")), label="Edit", icon="pencil-alt")     
 delete buttons: True
 confirm: True
 ---
