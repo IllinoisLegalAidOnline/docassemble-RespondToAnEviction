@@ -78,8 +78,6 @@ code: |
     cclahd_info
   case_number
   trial_with
-  #if trial_with != "judge only":
-  #  jury_demand_filing_info
     
   set_progress(30)
   nav.set_section('section_answer')
@@ -511,11 +509,13 @@ question: |
 subquestion: |
   This program will make an *Appearance* you can file with the court. Whether or not you have filed a written *Appearance* before your court date, you still must go to court to tell the judge that you want to be a part of the case.
 
-  You have the right to a jury trial. If you want a jury trial, make sure you select that option in this program. This will check the appropriate box on the *Appearance* form. If you don't check that box, or if you don't file your *Appearance* before the court date and time on your Eviction Summons, you may lose the right to a jury trial.
+  You have the right to a jury trial. If you want a jury trial, make sure you select that option in this program. This will create a *Jury Request* form. If you don't file your *Jury Request* before the court date and time on your Eviction Summons, you may lose the right to a jury trial.
 
   If you haven't requested a jury by the first court date, the judge may give you additional time to do so if you ask, but there is no guarantee you will get extra time.
+
+  A trial with just a judge and no jury is called a bench trial.
   
-  To learn more, read ILAO's article about [**jury trials and judge trials**](https://www.illinoislegalaid.org/node/178441).
+  To learn more, read ILAO's article about [**jury trials and bench trials**](https://www.illinoislegalaid.org/node/178441).
 ---
 id: case number
 question: |
@@ -539,14 +539,16 @@ id: trial by jury
 question: |
   Who do you want to decide your case?
 subquestion: |
-  Note: There can be an additional fee for a jury trial.
+  **Note:** There can be an additional fee for a jury trial.
+
+  A trial with just a judge and no jury is called a bench trial.
   
-  To learn more, read ILAO's article about [**jury trials and judge trials**](https://www.illinoislegalaid.org/node/178441).
+  To learn more, read ILAO's article about [**jury trials and bench trials**](https://www.illinoislegalaid.org/node/178441).
 field: trial_with
 choices:
-  - A judge: judge only
-  - A judge and a 6-person jury: judge and six-person jury
-  - A judge and a 12-person jury: judge and twelve-person jury
+  - A judge: Judge only
+  - A judge and a 6-person jury: Judge and six-person jury
+  - A judge and a 12-person jury: Judge and twelve-person jury
 ---      
 id: e-filing a jury demand
 continue button field: jury_demand_filing_info
@@ -798,7 +800,7 @@ question: |
 subquestion: |
   If a landlord wants to evict a tenant, they must follow the law in how they notify the tenant. If something was wrong with the Notice you received that told you about the eviction case, that may be a defense to this eviction case.
   
-  Note: It does not mean that the landlord can't evict you. It only means that they may have to start over and notify you in the proper way.
+  **Note:** It does not mean that the landlord can't evict you. It only means that they may have to start over and notify you in the proper way.
 
   Check all that apply.
 fields:
@@ -839,7 +841,7 @@ fields:
       is: "Yes"
   - Additional details about how you fixed the lease violation: cure_defense_details
     input type: area
-    rows: 5
+    rows: 6
     maxlength: 250
     required: False
     js show if: 
@@ -1100,6 +1102,7 @@ fields:
       is: True
   - Date you tried to pay rent to the landlord: rent_payment_date
     datatype: date
+    max: ${ today().format("yyyy-MM-dd") }
     show if:
       variable: rent_refusal_defense
       is: True
@@ -1157,9 +1160,17 @@ fields:
 ---
 id: affirmative defense details
 question: |
+  % if i == 0:
   Affirmative defense details
+  % else:
+  ${ ordinal(i).capitalize() } affirmative defense details
+  % endif
 subquestion: |
+  % if i == 0:
   Enter details about your affirmative defense.
+  % else:
+  Enter details about your ${ ordinal(i) } affirmative defense.
+  % endif
 fields:
   - Short name or description of the affirmative defense: defenses[i].name.text
     input type: area
@@ -1487,6 +1498,12 @@ fields:
     required: False
   - US mail or delivery company (like UPS or FedEx): users[i].mail_delivery
     datatype: yesnowide
+  - Address or intersection of mailbox or delivery company: users[i].delivery_mail_address
+    address autocomplete: False
+    show if: 
+      variable: users[i].mail_delivery
+      is: True
+    required: False    
   - City of mailbox or delivery company: users[i].delivery_mail_city
     maxlength: 30
     show if: 
@@ -1581,6 +1598,12 @@ fields:
     required: False
   - US mail or delivery company (like UPS or FedEx): other_parties[i].mail_delivery
     datatype: yesnowide
+  - Address or intersection of mailbox or delivery company: other_parties[i].delivery_mail_address
+    address autocomplete: False
+    show if: 
+      variable: other_parties[i].mail_delivery
+      is: True
+    required: False
   - City of mailbox or delivery company: other_parties[i].delivery_mail_city
     maxlength: 30
     show if: 
@@ -1758,7 +1781,7 @@ question: |
   Download
 subquestion: |
   
-  Your forms are ready. View and download your forms below. Click **Make changes** to fix any mistakes.
+  Your forms are ready. View and download your forms below. Click **:edit: Make changes** to fix any mistakes.
 
   This program **does not file** your forms with the court or deliver them to other parties in your case. You will need to do this yourself. Learn about [**e-filing in Illinois**](https://www.illinoiscourts.gov/eservices/information-for-filers-without-lawyers).
 
@@ -1996,7 +2019,7 @@ attachment:
 
       - "delivery_party1_name_full": | 
           % if delivery_parties[0].is_represented:
-          ${ delivery_parties[0].lawyer.name.full(middle="full") }, (lawyer for ${ delivery_parties[0].name.full(middle="full") })
+          ${ delivery_parties[0].lawyer.name.full(middle="full") } (lawyer for ${ delivery_parties[0].name.full(middle="full") })
           % else:
           ${ delivery_parties[0].name.full(middle="full") }
           % endif
@@ -2021,7 +2044,7 @@ attachment:
 
       - "delivery_party2_name_full": | 
           % if delivery_parties[1].is_represented:
-          ${ delivery_parties[1].lawyer.name.full(middle="full") }, (lawyer for ${ delivery_parties[1].name.full(middle="full") })
+          ${ delivery_parties[1].lawyer.name.full(middle="full") } (lawyer for ${ delivery_parties[1].name.full(middle="full") })
           % else:
           ${ delivery_parties[1].name.full(middle="full") }
           % endif
@@ -2065,7 +2088,7 @@ attachment:
 
       - "delivery_party1_name_full": | 
           % if x.is_represented:
-          ${ x.lawyer.name.full(middle="full") }, (lawyer for ${ x.name.full(middle="full") })
+          ${ x.lawyer.name.full(middle="full") } (lawyer for ${ x.name.full(middle="full") })
           % else:
           ${ x.name.full(middle="full") }
           % endif
@@ -2090,7 +2113,7 @@ attachment:
 
       - "delivery_party2_name_full": | 
           % if x.second_person.is_represented:
-          ${ x.second_person.lawyer.name.full(middle="full") }, (lawyer for ${ x.second_person.name.full(middle="full") })
+          ${ x.second_person.lawyer.name.full(middle="full") } (lawyer for ${ x.second_person.name.full(middle="full") })
           % else:
           ${ x.second_person.name.full(middle="full") }
           % endif
@@ -2160,15 +2183,15 @@ attachment:
       - "plaintiff_cb": ${ user_ask_role == 'plaintiff' }
       - "defendant_cb": ${ user_ask_role == 'defendant' }
 
-      - "jury_six": ${ trial_with == "judge and six-person jury" }
-      - "jury_twelve": ${ trial_with == "judge and twelve-person jury" }
+      - "jury_six": ${ trial_with == "Judge and six-person jury" }
+      - "jury_twelve": ${ trial_with == "Judge and twelve-person jury" }
       
       - "e_sign_name__1": ${ users[0].name.full(middle="full") if e_signature else '' }
       - "e_sign_name__2": ${ users[0].name.full(middle="full") if e_signature else '' }
 
       - "delivery_party1_name_full": | 
           % if delivery_parties[0].is_represented:
-          ${ delivery_parties[0].lawyer.name.full(middle="full") }, (lawyer for ${ delivery_parties[0].name.full(middle="full") })
+          ${ delivery_parties[0].lawyer.name.full(middle="full") } (lawyer for ${ delivery_parties[0].name.full(middle="full") })
           % else:
           ${ delivery_parties[0].name.full(middle="full") }
           % endif
@@ -2193,7 +2216,7 @@ attachment:
 
       - "delivery_party2_name_full": | 
           % if delivery_parties[1].is_represented:
-          ${ delivery_parties[1].lawyer.name.full(middle="full") }, (lawyer for ${ delivery_parties[1].name.full(middle="full") })
+          ${ delivery_parties[1].lawyer.name.full(middle="full") } (lawyer for ${ delivery_parties[1].name.full(middle="full") })
           % else:
           ${ delivery_parties[1].name.full(middle="full") }
           % endif
@@ -2244,7 +2267,7 @@ attachment:
       
       - "delivery_party1_name_full": | 
           % if x.is_represented:
-          ${ x.lawyer.name.full(middle="full") }, (lawyer for ${ x.name.full(middle="full") })
+          ${ x.lawyer.name.full(middle="full") } (lawyer for ${ x.name.full(middle="full") })
           % else:
           ${ x.name.full(middle="full") }
           % endif
@@ -2261,7 +2284,7 @@ attachment:
       
       - "delivery_party2_name_full": | 
           % if x.second_person.is_represented:
-          ${ x.second_person.lawyer.name.full(middle="full") }, (lawyer for ${ x.second_person.name.full(middle="full") })
+          ${ x.second_person.lawyer.name.full(middle="full") } (lawyer for ${ x.second_person.name.full(middle="full") })
           % else:
           ${ x.second_person.name.full(middle="full") }
           % endif
@@ -2473,7 +2496,7 @@ attachment:
     - "e_sign_name__2": ${ users[0].name.full(middle="full") if e_signature else '' }
     - "delivery_party1_name_full": | 
         % if delivery_parties[0].is_represented:
-        ${ delivery_parties[0].lawyer.name.full(middle="full") }, (lawyer for ${ delivery_parties[0].name.full(middle="full") })
+        ${ delivery_parties[0].lawyer.name.full(middle="full") } (lawyer for ${ delivery_parties[0].name.full(middle="full") })
         % else:
         ${ delivery_parties[0].name.full(middle="full") }
         % endif
@@ -2488,6 +2511,27 @@ attachment:
       
     - "is_delivery_party1_electronic": ${ True if delivery_parties[0].knows_delivery_method and ( delivery_parties[0].efm_delivery or delivery_parties[0].email_delivery ) else '' }
     - "is_delivery_party1_not_electronic": ${ True if delivery_parties[0].knows_delivery_method and ( delivery_parties[0].mail_delivery or delivery_parties[0].hand_delivery or delivery_parties[0].jail_delivery ) else '' }
+    - "delivery_party1_mail_location": |
+        % if delivery_parties[0].knows_delivery_method and delivery_parties[0].mail_delivery:
+        % if delivery_parties[0].delivery_mail_address != "" and delivery_parties[0].delivery_mail_city != "" and delivery_parties[0].delivery_mail_state != "":
+        ${delivery_parties[0].delivery_mail_address }, ${delivery_parties[0].delivery_mail_city}, ${ state_name(delivery_parties[0].delivery_mail_state) }
+        % elif delivery_parties[0].delivery_mail_address != "" and delivery_parties[0].delivery_mail_city != "":
+        ${delivery_parties[0].delivery_mail_address }, ${delivery_parties[0].delivery_mail_city}
+        % elif delivery_parties[0].delivery_mail_address != "" and delivery_parties[0].delivery_mail_state != "":
+        ${delivery_parties[0].delivery_mail_address }, ${ state_name(delivery_parties[0].delivery_mail_state) }
+        % elif delivery_parties[0].delivery_mail_city != "" and delivery_parties[0].delivery_mail_state != "":
+        ${delivery_parties[0].delivery_mail_city}, ${ state_name(delivery_parties[0].delivery_mail_state) }
+        % elif delivery_parties[0].delivery_mail_address != "":
+        ${delivery_parties[0].delivery_mail_address}
+        % elif delivery_parties[0].delivery_mail_city != "":
+        ${delivery_parties[0].delivery_mail_city}
+        % else:
+        ${state_name(delivery_parties[0].delivery_mail_state)}
+        % endif
+        % else:
+        ${ "" }
+        % endif
+    
     - "delivery_party1_mail_city": ${ delivery_parties[0].delivery_mail_city if delivery_parties[0].knows_delivery_method and delivery_parties[0].mail_delivery else '' }
     - "delivery_party1_mail_state": ${ state_name(delivery_parties[0].delivery_mail_state) if delivery_parties[0].knows_delivery_method and delivery_parties[0].mail_delivery else '' }
     - "delivery_party1_hand_address": ${ delivery_parties[0].hand_delivery_address.on_one_line(bare=True) if delivery_parties[0].knows_delivery_method and delivery_parties[0].hand_delivery else '' }
@@ -2496,7 +2540,7 @@ attachment:
 
     - "delivery_party2_name_full": | 
         % if delivery_parties[1].is_represented:
-        ${ delivery_parties[1].lawyer.name.full(middle="full") }, (lawyer for ${ delivery_parties[1].name.full(middle="full") })
+        ${ delivery_parties[1].lawyer.name.full(middle="full") } (lawyer for ${ delivery_parties[1].name.full(middle="full") })
         % else:
         ${ delivery_parties[1].name.full(middle="full") }
         % endif
@@ -2511,6 +2555,26 @@ attachment:
     
     - "is_delivery_party2_electronic": ${ True if delivery_parties[1].knows_delivery_method and ( delivery_parties[1].efm_delivery or delivery_parties[1].email_delivery ) else '' }
     - "is_delivery_party2_not_electronic": ${ True if delivery_parties[1].knows_delivery_method and ( delivery_parties[1].mail_delivery or delivery_parties[1].hand_delivery or delivery_parties[1].jail_delivery ) else '' }
+    - "delivery_party2_mail_location": |
+        % if delivery_parties[1].knows_delivery_method and delivery_parties[1].mail_delivery:
+        % if delivery_parties[1].delivery_mail_address != "" and delivery_parties[1].delivery_mail_city != "" and delivery_parties[1].delivery_mail_state != "":
+        ${delivery_parties[1].delivery_mail_address }, ${delivery_parties[1].delivery_mail_city}, ${ state_name(delivery_parties[1].delivery_mail_state) }
+        % elif delivery_parties[1].delivery_mail_address != "" and delivery_parties[1].delivery_mail_city != "":
+        ${delivery_parties[1].delivery_mail_address }, ${delivery_parties[1].delivery_mail_city}
+        % elif delivery_parties[1].delivery_mail_address != "" and delivery_parties[1].delivery_mail_state != "":
+        ${delivery_parties[1].delivery_mail_address }, ${ state_name(delivery_parties[1].delivery_mail_state) }
+        % elif delivery_parties[1].delivery_mail_city != "" and delivery_parties[1].delivery_mail_state != "":
+        ${delivery_parties[1].delivery_mail_city}, ${ state_name(delivery_parties[1].delivery_mail_state) }
+        % elif delivery_parties[1].delivery_mail_address != "":
+        ${delivery_parties[1].delivery_mail_address}
+        % elif delivery_parties[1].delivery_mail_city != "":
+        ${delivery_parties[1].delivery_mail_city}
+        % else:
+        ${state_name(delivery_parties[1].delivery_mail_state)}
+        % endif
+        % else:
+        ${ "" }
+        % endif      
     - "delivery_party2_mail_city": ${ delivery_parties[1].delivery_mail_city if delivery_parties[1].knows_delivery_method and delivery_parties[1].mail_delivery else '' }
     - "delivery_party2_mail_state": ${ state_name(delivery_parties[1].delivery_mail_state) if delivery_parties[1].knows_delivery_method and delivery_parties[1].mail_delivery else '' }
     - "delivery_party2_hand_address": ${ delivery_parties[1].hand_delivery_address.on_one_line(bare=True) if delivery_parties[1].knows_delivery_method and delivery_parties[1].hand_delivery else '' }
