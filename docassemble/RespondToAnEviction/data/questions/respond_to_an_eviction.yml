@@ -321,6 +321,8 @@ content: |
   * Contracts for deed (also called rent to own agreements or installment sales agreements).
   
   Different laws apply to these types of evictions.
+
+  If you want to make forms to respond to these non-residential evictions or other kinds of lawsuits, use ILAO's [**Respond to a lawsuit Easy Form**](https://www.illinoislegalaid.org/node/49611).
 ---
 
 id: rental property address
@@ -426,7 +428,7 @@ subject: |
 content: |  
   The plaintiffs and defendants are usually listed near the top of a court form. If a form has a checkbox for unknown occupants, it will be by the list of defendants.
   
-  [FILE uknown_occupants_image.png, 100%, Eviction complaint unknown occupants]
+  [FILE unknown_occupants_image.png, 100%, Eviction complaint unknown occupants]
 ---
 # modified other opposing parties question
 # add to basic questions
@@ -1699,7 +1701,7 @@ question: |
 subquestion: |
   **Don't forget!** Make sure you review and complete the Proof of Delivery section of your forms. 
   
-  [FILE proof_of_delivery_snip_2024.png, 100%, Proof of Delivery section of forms]
+  [FILE proof_of_delivery_snip_2025.png, 100%, Proof of Delivery section of forms]
 
   **Instructions when delivering your forms by hand:**
 
