@@ -178,7 +178,7 @@ subquestion: |
 
   This program helps you respond to an eviction by telling the court and the other parties that you are participating in the court case. It also helps you make an *Eviction Answer, Defenses, and Counterclaims* form that tells how you respond to what is written in the complaint.
   
-  To learn more, read ILAO's article, [**Eviction basics**](https://www.illinoislegalaid.org/node/31071).
+  To learn more, read ILAO's article, [**Going to court for an eviction case**](https://www.illinoislegalaid.org/node/31071).
 field: sees_nav_bar
 ---
 id: instructions
@@ -302,7 +302,7 @@ subquestion: |
   * Condominium owners being sued by the association, or
   * Contracts for deed (also called rent to own agreements or installment sales agreements).
   
-  To respond to a different kind of lawsuit, use ILAO's [**Respond to a lawsuit Easy Form**](https://www.illinoislegalaid.org/legal-information/respond-lawsuit).
+  To respond to a different kind of lawsuit, use ILAO's [**Respond to a lawsuit Easy Form**](https://www.illinoislegalaid.org/node/49611).
 
   Click **Back** if you made a mistake. Or you can talk with a lawyer to discuss your options. Use **[Get Legal Help](https://www.illinoislegalaid.org/get-legal-help)** to find free or low-cost legal services in your area.
 buttons:
@@ -509,7 +509,7 @@ continue button field: appearance_info
 question: |
   Appearance and jury trial information
 subquestion: |
-  This program will make an *Appearance* you can file with the court. Whether or not you have filed a written *Appearance* before your court date, you still must go to court to tell the judge that you want to be a part of the case.
+  This program will make an *Appearance* you can file with the court. Whether or not you have filed a written *Appearance* before your court date, you still must go to court to tell the judge that you want to be a part of the case. To learn more, see ILAO's article on [**responding to a lawsuit**](https://www.illinoislegalaid.org/node/32236).
 
   You have the right to a jury trial. If you want a jury trial, make sure you select that option in this program. This will create a *Jury Request* form. If you don't file your *Jury Request* before the court date and time on your Eviction Summons, you may lose the right to a jury trial.
 
@@ -517,7 +517,7 @@ subquestion: |
 
   A trial with just a judge and no jury is called a bench trial.
   
-  To learn more, read ILAO's article about [**jury trials and bench trials**](https://www.illinoislegalaid.org/node/178441).
+  To learn more, read ILAO's article about [**civil jury trials and civil bench trials**](https://www.illinoislegalaid.org/node/178441).
 ---
 id: case number
 question: |
@@ -545,7 +545,7 @@ subquestion: |
 
   A trial with just a judge and no jury is called a bench trial.
   
-  To learn more, read ILAO's article about [**jury trials and bench trials**](https://www.illinoislegalaid.org/node/178441).
+  To learn more, read ILAO's article about [**civil jury trials and civil bench trials**](https://www.illinoislegalaid.org/node/178441).
 field: trial_with
 choices:
   - A judge: Judge only
@@ -623,7 +623,7 @@ subquestion: |
       <li>Everything on the forms is true and correct, or you have been informed or you believe it is true and correct, and</li>
       <li>You understand that making a false statement on the forms is perjury and has penalties provided by law.</li>
     </ul></p>
-  <p>See the <a href="https://www.ilga.gov/legislation/ilcs/documents/073500050k1-109.htm"><b>Code of Civil Procedure, 735 ILCS 5/1-109</b></a> for more information.</p>
+  <p>See the <a href="https://www.ilga.gov/legislation/ilcs/documents/073500050k1-109.htm"><b>Illinois Code of Civil Procedure, 735 ILCS 5/1-109</b></a> for more information.</p>
   </div>
 
 fields:
@@ -1714,9 +1714,6 @@ question: |
 subquestion: |
   On the *Appearance*, you can tell the court which pronouns you use.
 fields:
-  - I prefer not to answer.: pronouns_none
-    datatype: yesno
-    disable others: True
   - Pronouns (optional): pronouns
     datatype: checkboxes
     none of the above: False
@@ -1731,6 +1728,9 @@ fields:
     show if:
       variable: pronouns["Other"]
       is: True
+  - I prefer not to answer.: pronouns_none
+    datatype: yesno
+    disable others: True
 validation code: |
   if pronouns_none == False and pronouns.all_false():
     validation_error("Please select at least one.", field="pronouns")
@@ -1741,9 +1741,6 @@ question: |
 subquestion: |
   On the *Appearance*, you can tell the court what prefix you use.
 fields:
-  - I prefer not to answer.: prefix_none
-    datatype: yesno
-    disable others: True
   - Prefix (optional): prefix
     datatype: checkboxes
     none of the above: False
@@ -1759,6 +1756,9 @@ fields:
     show if:
       variable: prefix["Other"]
       is: True
+  - I prefer not to answer.: prefix_none
+    datatype: yesno
+    disable others: True
 validation code: |
   if prefix_none == False and prefix.all_false():
     validation_error("Please select at least one.", field="prefix")
